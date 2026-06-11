@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Notes of Git
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Notes of Git" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Notes of Git
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2023-12-01</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/git/"
+                                       class="post-tag">git</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="notes-of-git">Notes of Git</h1>
+<h2 id="basic-settings">Basic Settings</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #B57EDC;">git</span><span style="color: #98C379;"> config</span><span style="color: #56B6C2;"> --global</span><span style="color: #98C379;"> user.name</span><span> &quot;</span><span style="color: #98C379;">kvn</span><span>&quot;</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">git</span><span style="color: #98C379;"> config</span><span style="color: #56B6C2;"> --global</span><span style="color: #98C379;"> user.email username@email.com</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">git</span><span style="color: #98C379;"> config</span><span style="color: #56B6C2;"> --global</span><span style="color: #98C379;"> core.autocrlf input</span><span style="color: #5F6672;font-style: italic;"> # for MacOS</span></span></code></pre><h2 id="appending-operations">Appending Operations</h2>
+<ul>
+<li>Showing files in the staging area by <code>git ls-files</code></li>
+<li>Storing files that are <code>git add</code> .</li>
+<li>Modified files will have to be <code>git add</code> again</li>
+</ul>
+<p>If <code>git status</code> gives green info, it means it's all the same for <strong>Working Directory</strong> and <strong>Staging Area</strong>. If it says committed, then <strong>Repository</strong> too.</p>
+<p><em><strong>Skip Staging</strong></em>:</p>
+<p>use <code>git commit -am "info"</code> for adding</p>
+<p>use <code>git rm filename1...</code> for deleting</p>
+<p>use <code>git mv file file1</code> for renaming or moving</p>
+<p><strong>Only do this when you know what you are doing</strong></p>
+<h2 id="ignoring-files">Ignoring Files</h2>
+<p>Files like logs usually shouldn't be tracked.</p>
+<p>use .gitignore file to book files unneeded in the following form:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="plain"><span class="giallo-l"><span>logs/</span></span>
+<span class="giallo-l"><span>main.log</span></span>
+<span class="giallo-l"><span>*.log</span></span></code></pre>
+<p>If files are already in repo, adding them to .gitignore file is not going to let git ignore them. To solve this, we use <code>git rm --cached dir_dont_want_to_track</code> to only remove it from the staging area(may have to use <code>-r</code> to recursively <code>rm</code>).</p>
+<h2 id="viewing-operation">Viewing Operation</h2>
+<h3 id="simple-view">Simple View</h3>
+<p>use <code>git status -s</code> for simplified info.</p>
+<p><code>M</code> for modified; <code>A</code> for added.</p>
+<h3 id="see-diff">See Diff</h3>
+<p>use <code>git diff --staged</code> to compare files changed between the last committed and currently staged.</p>
+<p>use <code>git diff</code> to compare files changed between the currently staged and working directory.</p>
+<h3 id="diff-tool">Diff Tool</h3>
+<p><strong>Set up</strong>:</p>
+<p><code>git config --global diff.tool vscode</code></p>
+<p><code>git config --global difftool.vscode.cmd "code --wait --diff $LOCAL $REMOTE"</code></p>
+<p>check by:</p>
+<p><code>git config --global -e</code></p>
+<h3 id="history">History</h3>
+<p>use <code>git log</code> to see history.</p>
+<p><strong>Options</strong>:</p>
+<ul>
+<li>
+<p><code>--oneline</code>: simplified output, ID &amp; comment</p>
+</li>
+<li>
+<p><code>--reverse</code>: presented in the way of bottom up</p>
+</li>
+</ul>
+<p>use <code>git show ID</code> or <code>git show HEAD~step_before</code> to see the diff of the commits</p>
+<p>use <code>git show ID:file</code> to see the file of the commit <code>ID</code></p>
+<p>use <code>git ls-tree ID</code> to list all files with their <code>unique_id</code>  of version <code>ID</code></p>
+<p>use <code>git show unique_id</code> to see <code>blob</code> or <code>tree</code> by their <code>unique_id</code></p>
+<h2 id="restoring-files">Restoring Files</h2>
+<p>use <code>git restore --staged file</code> to restore files from staging area to the working directory</p>
+<ul>
+<li>
+<p>when restoring modified files, git uses copies from the repo to replace files in the staging area.</p>
+</li>
+<li>
+<p>when restoring added files, git reverts the stage of files back to untracked</p>
+</li>
+</ul>
+<p>use <code>git restore file</code> to restore files from the working directory to the previous version</p>
+<ul>
+<li>when restoring modified files, git replaces them with the latest copies from the repo</li>
+<li>git doesn't restore untracked files, if no <strong>Options</strong> like <code>-fd</code> are given, the move is considered dangerous and will not process.</li>
+</ul>
+<p>use <code>git restore --source=HEAD~1 file</code> to restore files to the version <code>ID</code></p>
+<h2 id="remote">Remote</h2>
+<p>use <code>git remote add name url</code> to add new remote repo</p>
+<p>use <code>git pull</code> to directly pull the repo to the working directory(space)</p>
+<p>use <code>git fetch</code> to fetch the repo to the local repo</p>
+<p>use <code>git push</code> to push the local repo to the remote</p>
+<h2 id="branches">Branches</h2>
+<h3 id="basics">Basics</h3>
+<p>use <code>git branch name</code> to create a new branch from the current branch</p>
+<p>use <code>git branch switch name</code> to switch HEAD to branch name</p>
+<h3 id="merge-or-rebase">Merge or Rebase</h3>
+<p>The following graph presents 3 different ways of merging branches.</p>
+<p><img src="/images/git-merge-rebase.png" alt="Git merge and rebase comparison" />{:height="400px" width="auto"}</p>
+<p>use <code>git merge feature</code> to merge the feature branch to the master when HEAD -&gt; master</p>
+<p>use <code>git rebase feature</code> to merge the branch in terms of rebase to the master</p>
+<h3 id="dealing-conflicts">Dealing Conflicts</h3>
+<p>when two branches change the same line of the same file and attend to merge, one has to decide which version to stay.</p>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#notes-of-git">Notes of Git</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#basic-settings">Basic Settings</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#appending-operations">Appending Operations</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#ignoring-files">Ignoring Files</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#viewing-operation">Viewing Operation</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#simple-view">Simple View</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#see-diff">See Diff</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#diff-tool">Diff Tool</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#history">History</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#restoring-files">Restoring Files</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#remote">Remote</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-git/#branches">Branches</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#basics">Basics</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#merge-or-rebase">Merge or Rebase</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-git/#dealing-conflicts">Dealing Conflicts</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

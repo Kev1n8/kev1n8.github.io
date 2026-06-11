@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Distributed System Lab
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Distributed System Lab" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Distributed System Lab
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2024-07-20</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/distributed-systems/"
+                                       class="post-tag">distributed-systems</a>
+                                
+                                    <a href="https://kaifengzheng.github.io/tags/raft/"
+                                       class="post-tag">raft</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="distributed-system-labs">Distributed System Labs</h1>
+<p>Some drafts and notes.</p>
+<h2 id="1-mapreduce">#1 MapReduce</h2>
+<h3 id="test-mr-sh">test_mr.sh</h3>
+<p><code>mrcoordinator .//pg*txt</code></p>
+<p>then multiple workers</p>
+<p><code>mrworker .//.//mrapps/app.so</code></p>
+<p><strong>Workflow</strong>:</p>
+<p>master awake, prepare rpc and splits. workers awake, prepare map/reduce functions and start asking for task.</p>
+<ol>
+<li>master get M map tasks and R reduce tasks ready. picking up workers to assign</li>
+<li>map workers read the splits and save the intermediate files, tell the master about the R locations(which files)</li>
+<li>master receive task done msg, master picks workers to do reduce task, telling them the location of the R they are going to deal with.</li>
+<li>reduce workers use rpc to read target R files from different map workers. once all read, sort them all by inter-key. reduce workers then iterate over the sorted data and do reduce func. the ouput of the func is appended to a final output file of this R partition. done, call master is done</li>
+<li>once all done, master</li>
+</ol>
+<h4 id="conclusion">Conclusion</h4>
+<p>So I suppose that this is not that hard since it didn't take much time for me to accomplish the task. To be honest, the reason I'd been stuck for a little while when <code>bash test-mr.sh</code> is because the path of the file is incorrect (changed it to absolute path later ).</p>
+<h2 id="2-key-value-server">#2 Key/Value Server</h2>
+<p>To implement an in-memory server and clients. It's pretty easy that there's really no much to talk about.</p>
+<p><strong>Techniques Used</strong></p>
+<ol>
+<li>Still, using <strong>RPC</strong> to call remote functions</li>
+<li>Using <em>unique Ids</em> to represent each of the clients and each request.</li>
+</ol>
+<p><strong>2 Things blocked me for a while</strong></p>
+<ol>
+<li>
+<p>A silly mistake - the fact is that <code>Call()</code> is executed only once, and then there's a terrible infinite loop</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="go"><span class="giallo-l"><span style="color: #E06C75;">for</span><span style="color: #C6CCD7;"> ok</span><span style="color: #E06C75;"> :=</span><span style="color: #C6CCD7;"> ck</span><span>.</span><span style="color: #B57EDC;">Call</span><span>(&quot;</span><span style="color: #98C379;">Server.Put</span><span>&quot;,</span><span style="color: #E06C75;"> &amp;</span><span style="color: #C6CCD7;">args</span><span>,</span><span style="color: #E06C75;"> &amp;</span><span style="color: #C6CCD7;">reply</span><span>);</span><span style="color: #E06C75;"> !</span><span style="color: #C6CCD7;">ok</span></span></code></pre></li>
+<li>
+<p>Using <em>Unique Ids</em> to represent <code>values</code> instead of Reqs - bad things would happen when other clients change the record, hence causing duplicate put/append</p>
+</li>
+</ol>
+<h4 id="conclusion-1">Conclusion</h4>
+<p>The lab is marked <strong>Easy</strong>, which is true just that I am supposed to finish it in real quick.</p>
+<h2 id="3-raft">#3 Raft</h2>
+<h3 id="election">Election</h3>
+<p>I've drawn a figure listing out the summary of rules, check out:</p>
+<p><img src="/images/election_state.png" alt="state_transfer" /></p>
+<p>Also, some variables and details as:</p>
+<p><img src="/images/election_variable&amp;rules.png" alt="election_variables_rules" /></p>
+<h3 id="log">Log</h3>
+<p>The rule of log replication can be interpreted as the following graphs:</p>
+<p><img src="/images/log_replication_basic.png" alt="log_replication_basic" /></p>
+<p>Demonstrating an unreliable test that I'd debugged for a while and Tips:</p>
+<p><img src="/images/log_replication_atest.png" alt="log_replication_atest" /></p>
+<p>In order to back up faster, I also implement the following technique:</p>
+<p><img src="/images/log_replication_quick_backup.png" alt="log_replication_quick_backup" /></p>
+<p>By sending <code>XTerm</code>, <code>XIndex</code>, and <code>Len</code> back to the leader, the leader can then quickly decide what <code>nextIndex[target]</code> should be set and get rid of meaningless retries.</p>
+<h3 id="persistence">Persistence</h3>
+<p><img src="/images/persistence_summary.png" alt="persistence_summary" /></p>
+<h3 id="log-compaction">Log Compaction</h3>
+<p><img src="/images/log_compaction_procedure.png" alt="log_compaction_procedure" /></p>
+<p><img src="/images/log_compaction_points.png" alt="log_compaction_points" /></p>
+<h2 id="4-fault-tolerant-k-v-service">#4 Fault-Tolerant K/V Service</h2>
+<p>Note: All of the fields in RPC args should be initialized, otherwise the RPC will fail.(on returning(never return))</p>
+<p><img src="/images/lab4.png" alt="lab4" /></p>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#distributed-system-labs">Distributed System Labs</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#1-mapreduce">#1 MapReduce</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#test-mr-sh">test_mr.sh</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#2-key-value-server">#2 Key&#x2F;Value Server</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#conclusion-1">Conclusion</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#3-raft">#3 Raft</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#election">Election</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#log">Log</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#persistence">Persistence</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#log-compaction">Log Compaction</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/distributed-system-lab/#4-fault-tolerant-k-v-service">#4 Fault-Tolerant K&#x2F;V Service</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

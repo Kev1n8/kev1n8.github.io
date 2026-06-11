@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Understanding Async Rust: The Future Trait
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Understanding Async Rust: The Future Trait" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Understanding Async Rust: The Future Trait
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2025-04-01</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/rust/"
+                                       class="post-tag">rust</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="understanding-async-rust-the-future-trait">Understanding Async Rust: The Future Trait</h1>
+<p>This blog is intended to summarize the key ideas when it comes to async Rust, hence it's not going to deep in every topic. Please refer to more professional papers.</p>
+<h2 id="general-picture-of-async-and-await">General Picture of <code>async</code> and <code>await</code></h2>
+<p>It's obvious that the biggest difference between sync and async code is that the latter one has these keywords used in function signatures or bodies. However, one may wonder what is that supposed to mean.</p>
+<p><code>async</code> is used in front of a <code>fn</code> or a closure. It literally means that the <code>fn</code> or the closure is returning a <code>Future</code>. Meanwhile, <code>await</code> is "called" on a <code>Future</code>. To simply say, it tells the compiler to generate necessary codes for state changing.</p>
+<p>So the big picture is, we treat async functions (or async closures) as a mission to be completed for in the future. And it's not going to activate/be invoked unless we call <code>await</code> on that <code>Future</code>. While waiting for the result of that <code>Future</code>, the control is yielded to other tasks that might be ready and waiting to be executed. The "pause" and "resume" of tasks mechanism should thanks to a specific async task runtime.</p>
+<p>There are several great tools when it comes to async runtime for Rust, e.g. tokio, async-std, smol. Since tokio is the most used one, we'll focus on it.</p>
+<p>A runtime is responsible for the reconsiling of tasks. In tokio, there are several workers, each runs on a thread, polling the futures (we'll explain "polling" later. you may think it's like processing that task). Each worker has a local queue whose items are tasks waiting to be polled. And there also is a global queue first. The task is stealing-based in tokio, which means if a worker has empty queue, it'll try to steal task from other workers' queue if available.</p>
+<p>A simple example of usage:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> run_async_task</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> i32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    return</span><span style="color: #56B6C2;"> 0</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#[tokio</span><span style="color: #E06C75;">::</span><span>main]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> fut</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> run_async_task</span><span>();</span><span style="color: #5F6672;font-style: italic;"> // Return a future, not run.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> zero</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> fut</span><span style="color: #E06C75;">.await</span><span>;</span><span style="color: #5F6672;font-style: italic;"> // Here, the control yields and the runtime will start `run_async_task()`</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="about-future">About <code>Future</code></h2>
+<p><code>Future</code> is a trait that indicates its result might be ready in the future. It's similar to promise in JavaScript. Let's look at its definition:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> trait</span><span style="color: #E5C07B;"> Future</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    /// The type of value produced on completion.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    type</span><span style="color: #E5C07B;"> Output</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> poll</span><span>(</span><span style="color: #E06C75;">self:</span><span style="color: #E5C07B;"> Pin</span><span>&lt;</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> Self</span><span>&gt;,</span><span style="color: #C6CCD7;"> cx</span><span style="color: #E06C75;">: &amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E5C07B;"> Context</span><span>&lt;&#39;</span><span style="color: #E5C07B;">_</span><span>&gt;)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Poll</span><span>&lt;</span><span style="color: #E06C75;">Self::</span><span style="color: #E5C07B;">Output</span><span>&gt;;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="example">Example</h2>
+<p>By the following example, you'll get how futrues work:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> fn_1</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> i32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">    1</span><span style="color: #E5C07B;">i32</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> add_2</span><span>(</span><span style="color: #C6CCD7;">a</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> i32</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> i32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    a</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 2</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> run_add</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">   let</span><span style="color: #C6CCD7;"> a</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> fn_1</span><span>()</span><span style="color: #E06C75;">.await</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">   let</span><span style="color: #C6CCD7;"> b</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> add_2</span><span>(</span><span style="color: #C6CCD7;">a</span><span>)</span><span style="color: #E06C75;">.await</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">   println!</span><span>(&quot;{</span><span style="color: #98C379;">b</span><span>}&quot;);</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span>#[tokio</span><span style="color: #E06C75;">::</span><span>main]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    run_add</span><span>()</span><span style="color: #E06C75;">.await</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Simplified pseudocode illustrating the state machine for run_add()</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">future</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Future</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">pin</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Pin</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">task</span><span style="color: #E06C75;">::</span><span>{</span><span style="color: #E5C07B;">Context</span><span>,</span><span style="color: #E5C07B;"> Poll</span><span>,</span><span style="color: #E5C07B;"> Waker</span><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Let&#39;s assume these async functions exist:</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> fn_1</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> i32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">    1</span><span style="color: #5F6672;font-style: italic;"> // Returns immediately for simplicity.</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> add_2</span><span>(</span><span style="color: #C6CCD7;">a</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> i32</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> i32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    a</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 2</span><span style="color: #5F6672;font-style: italic;"> // Also returns immediately for simplicity.</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// The state machine states for run_add</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> RunAddState</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Start</span><span>,</span><span style="color: #5F6672;font-style: italic;">                   // Before any await.</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    WaitingFn1</span><span> {</span><span style="color: #5F6672;font-style: italic;">              // Waiting for fn_1 to complete.</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        future</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Pin</span><span>&lt;</span><span style="color: #E5C07B;">Box</span><span>&lt;</span><span style="color: #E06C75;">dyn</span><span style="color: #E5C07B;"> Future</span><span>&lt;</span><span style="color: #E5C07B;">Output</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> i32</span><span>&gt;&gt;&gt;,</span></span>
+<span class="giallo-l"><span>    },</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    WaitingAdd2</span><span> {</span><span style="color: #C6CCD7;"> a</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> i32</span><span>,</span><span style="color: #5F6672;font-style: italic;">      // Holds the result from fn_1.</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        future</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Pin</span><span>&lt;</span><span style="color: #E5C07B;">Box</span><span>&lt;</span><span style="color: #E06C75;">dyn</span><span style="color: #E5C07B;"> Future</span><span>&lt;</span><span style="color: #E5C07B;">Output</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> i32</span><span>&gt;&gt;&gt;,</span></span>
+<span class="giallo-l"><span>    },</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Finished</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #E5C07B;"> RunAdd</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    state</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> RunAddState</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Future</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> RunAdd</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    type</span><span style="color: #E5C07B;"> Output</span><span style="color: #E06C75;"> =</span><span> ();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> poll</span><span>(</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self:</span><span style="color: #E5C07B;"> Pin</span><span>&lt;</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> Self</span><span>&gt;,</span><span style="color: #C6CCD7;"> cx</span><span style="color: #E06C75;">: &amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E5C07B;"> Context</span><span>&lt;&#39;</span><span style="color: #E5C07B;">_</span><span>&gt;)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Poll</span><span>&lt;()&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        loop</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            match &amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self.</span><span>state {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Start</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // We initiate fn_1() here.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> future_fn1</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Box</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">pin</span><span>(</span><span style="color: #B57EDC;">fn_1</span><span>());</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // Transition state to WaitingFn1 with the future.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    self.</span><span>state </span><span style="color: #E06C75;">=</span><span style="color: #E5C07B;"> RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">WaitingFn1</span><span> {</span><span style="color: #C6CCD7;"> future</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;"> future_fn1</span><span> };</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">WaitingFn1</span><span> {</span><span style="color: #C6CCD7;"> future</span><span> }</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // Poll the inner future from fn_1.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    match</span><span style="color: #C6CCD7;"> future</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_mut</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">poll</span><span>(</span><span style="color: #C6CCD7;">cx</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                        Poll</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">Ready</span><span>(</span><span style="color: #C6CCD7;">a</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                            // fn_1() is done, we got the result &#39;a&#39;.</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                            // Now prepare to call add_2(a).</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                            let</span><span style="color: #C6CCD7;"> future_add2</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Box</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">pin</span><span>(</span><span style="color: #B57EDC;">add_2</span><span>(</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                            self.</span><span>state </span><span style="color: #E06C75;">=</span><span style="color: #E5C07B;"> RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">WaitingAdd2</span><span> {</span><span style="color: #C6CCD7;"> a</span><span>,</span><span style="color: #C6CCD7;"> future</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;"> future_add2</span><span> };</span></span>
+<span class="giallo-l"><span>                        }</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                        Poll</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Pending</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                            // fn_1() isn&#39;t finished yet.</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                            // Yield control back to the executor.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                            return</span><span style="color: #E5C07B;"> Poll</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Pending</span><span>;</span></span>
+<span class="giallo-l"><span>                        }</span></span>
+<span class="giallo-l"><span>                    }</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">WaitingAdd2</span><span> {</span><span style="color: #C6CCD7;"> a</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;"> _</span><span>,</span><span style="color: #C6CCD7;"> future</span><span> }</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // Poll the inner future from add_2.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    match</span><span style="color: #C6CCD7;"> future</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_mut</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">poll</span><span>(</span><span style="color: #C6CCD7;">cx</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                        Poll</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">Ready</span><span>(</span><span style="color: #C6CCD7;">b</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                            // add_2 has finished. We can now use the result.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">                            println!</span><span>(&quot;</span><span style="color: #98C379;">Result: </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> b</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                            self.</span><span>state </span><span style="color: #E06C75;">=</span><span style="color: #E5C07B;"> RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Finished</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                            return</span><span style="color: #E5C07B;"> Poll</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">Ready</span><span>(());</span></span>
+<span class="giallo-l"><span>                        }</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                        Poll</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Pending</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                            // Still waiting for add_2—for now, yield control.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                            return</span><span style="color: #E5C07B;"> Poll</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Pending</span><span>;</span></span>
+<span class="giallo-l"><span>                        }</span></span>
+<span class="giallo-l"><span>                    }</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Finished</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">                    panic!</span><span>(&quot;</span><span style="color: #98C379;">Polling after completion</span><span>&quot;);</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span>            }</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#[tokio</span><span style="color: #E06C75;">::</span><span>main]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">async fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    RunAdd</span><span> {</span><span style="color: #C6CCD7;"> state</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> RunAddState</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Start</span><span> }</span><span style="color: #E06C75;">.await</span><span>;</span><span style="color: #5F6672;font-style: italic;"> // Runtime polls here.</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Then, the async runtime will start "epolling" (kinda) the futures, until it returns <code>Finished</code>.</p>
+<p>ref. https://wiki.cont.run/lowering-async-await-in-rust/</p>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/about-async-rust/#understanding-async-rust-the-future-trait">Understanding Async Rust: The Future Trait</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/about-async-rust/#general-picture-of-async-and-await">General Picture of async and await</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/about-async-rust/#about-future">About Future</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/about-async-rust/#example">Example</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

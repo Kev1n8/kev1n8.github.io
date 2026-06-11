@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Understanding Rust Macros: Compilation &amp; Declarative Patterns
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Understanding Rust Macros: Compilation &amp; Declarative Patterns" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Understanding Rust Macros: Compilation &amp; Declarative Patterns
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2025-04-01</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/rust/"
+                                       class="post-tag">rust</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="understanding-rust-macros-compilation-declarative-patterns">Understanding Rust Macros: Compilation &amp; Declarative Patterns</h1>
+<p>Before deciding which type of macro to write, ask yourself the questions below:</p>
+<ul>
+<li>Is this a basic find/replace (e.g. implementing the same trait for different integer types or tuple lengths) or do I need some sort of conditional logic?</li>
+<li>Do I need to track more "state" than a can be achieved with a simple pushdown accumulator?</li>
+<li>Is this purely a syntactic operation or do I need to inspect a token's value and do logic with it?</li>
+</ul>
+<h2 id="compiling-trip">Compiling Trip</h2>
+<p>Rust compilation goes through stages below:</p>
+<ol>
+<li>Tokenization -- keywords</li>
+<li>Parsing -- where AST constructed</li>
+<li><strong>Macro Expansion</strong></li>
+<li>Name Resolution and Type Checking</li>
+<li>Intermediate Representation</li>
+<li>Optimization</li>
+<li>Code Generation -- to LLVM IR</li>
+<li>LLVM Optimization</li>
+<li>Machine Code Generation</li>
+<li>Linking</li>
+</ol>
+<p><strong>Tokens tree is distinct from AST</strong></p>
+<h3 id="macro-in-ast">Macro in AST</h3>
+<ol>
+<li><code># [ $arg ];</code> e.g. #[derive(Clone)], #[no_mangle], …</li>
+<li><code># ! [ $arg ];</code> e.g. #![allow(dead_code)], #![crate_name="blang"], …</li>
+<li><code>$name ! $arg;</code> e.g. println!("Hi!"), concat!("a", "b"), …</li>
+<li><code>$name ! $arg0 $arg1;</code> e.g. macro_rules! dummy { () =&gt; {}; }.</li>
+</ol>
+<h3 id="expansion">Expansion</h3>
+<p>Intuitively, this is done by "expanding" the AST on its <em>syntax extensions</em> invocations <strong>recursively</strong>, and level-up no more than 128(default).</p>
+<h3 id="hygiene">Hygiene</h3>
+<p>Simply saying, in Rust, macro can't <code>use</code> the identifier ouside or <code>create</code> an identifier then <code>use</code> outside of it.</p>
+<h2 id="declarative-macro">Declarative Macro</h2>
+<p><code>macro_rules!</code> checks the rules one by one, perform expansion once the <code>matcher</code> matches.</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #B57EDC;">macro_rules!</span><span style="color: #E06C75;"> $</span><span style="color: #C6CCD7;">name</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    $</span><span style="color: #C6CCD7;">rule0</span><span> ;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    $</span><span style="color: #C6CCD7;">rule1</span><span> ;</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // …</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    $</span><span style="color: #C6CCD7;">ruleN</span><span> ;</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">$</span><span style="color: #C6CCD7;">rule</span><span style="color: #E06C75;">:</span><span> (</span><span style="color: #E06C75;">$</span><span style="color: #C6CCD7;">matcher</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span> {</span><span style="color: #E06C75;">$</span><span style="color: #C6CCD7;">expansion</span><span>}</span></span></code></pre>
+<p><code>macro_rules!</code>'s invocation does not expand in AST, the macro is registered internally in the compiler.</p>
+<p>Repetition example</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">$</span><span> (</span><span style="color: #E06C75;"> ...</span><span> )</span><span style="color: #C6CCD7;"> sep rep</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">macro_rules! sample</span><span> {</span></span>
+<span class="giallo-l"><span>    (</span><span style="color: #E06C75;">$</span><span>(</span><span style="color: #E06C75;">$</span><span style="color: #C6CCD7;">e</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;">ident</span><span>),</span><span style="color: #E06C75;">*</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        $</span><span>(</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">            // operation</span></span>
+<span class="giallo-l"><span>        )</span><span style="color: #E06C75;">*</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><code>sep</code> options: <code>,</code>, <code>;</code> or space by default
+<code>rep</code> options: <code>*</code>, <code>+</code>, or <code>?</code> which can't be used with <code>sep</code> since at most 1</p>
+<h3 id="minutiae">Minutiae</h3>
+<p>The following labels are that we can capture from the input:</p>
+<ul>
+<li>block -- capture a code block like <code>{...}</code></li>
+<li>expr -- a lot</li>
+<li>ident -- identifiers and keywords</li>
+<li>item -- definitions like <code>struct Foo</code> or <code>pub use crate::mod</code></li>
+<li>lifetime -- similar to ident but start with <code>'</code></li>
+<li>literal -- immediate values</li>
+<li>meta -- matches attributes</li>
+<li>pat -- any kind of pattern</li>
+<li>pat_param -- any pattern but no <code>|</code></li>
+<li>path -- a path like <code>crate::mod</code></li>
+<li>stmt -- a statement</li>
+<li>tt -- a token tree</li>
+<li>ty -- a type expression</li>
+<li>vis -- visibility like <code>pub(crate)</code></li>
+</ul>
+<h3 id="scoping">Scoping</h3>
+<p><code>#[macro_use]</code>: <code>use</code> all the macro inside the first following mod, applicable for the whole "level".
+<code>#[macro_export]</code>: export the macro to outside (of <code>crate</code>), other users may <code>use mod::some_macro;</code>(only applicable for external crate).</p>
+<h3 id="todo">TODO</h3>
+<p>There are more sections to learn. Maybe learn on practice.</p>
+<h2 id="procedural-macro">Procedural Macro</h2>
+<h3 id="types">Types</h3>
+<ul>
+<li><em>function-like</em> proc-macros -- <code>$name ! $arg</code></li>
+<li><em>atribute</em> proc-macros -- <code>#[$arg]</code></li>
+<li><em>derive</em> proc-macros -- <code>#[derive(...)]</code></li>
+</ul>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[proc_macro]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> my_proc_macro</span><span>(</span><span style="color: #C6CCD7;">input</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> TokenStream</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> TokenStream</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    TokenStream</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>()</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[proc_macro_attribute]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> my_attribute</span><span>(</span><span style="color: #C6CCD7;">input</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> TokenStream</span><span>,</span><span style="color: #C6CCD7;"> annotated_item</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> TokenStream</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> TokenStream</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    TokenStream</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>()</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[proc_macro_derive]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> my_derive</span><span>(</span><span style="color: #C6CCD7;">annotatated_item</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> TokenStream</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> TokenStream</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    TokenStream</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>()</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="useful-third-party-tools">Useful Third-party tools</h3>
+<ul>
+<li>proc-macro2</li>
+<li>quote</li>
+<li>syn</li>
+</ul>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/rust-macro/#understanding-rust-macros-compilation-declarative-patterns">Understanding Rust Macros: Compilation &amp; Declarative Patterns</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/rust-macro/#compiling-trip">Compiling Trip</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#macro-in-ast">Macro in AST</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#expansion">Expansion</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#hygiene">Hygiene</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/rust-macro/#declarative-macro">Declarative Macro</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#minutiae">Minutiae</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#scoping">Scoping</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#todo">TODO</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/rust-macro/#procedural-macro">Procedural Macro</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#types">Types</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/rust-macro/#useful-third-party-tools">Useful Third-party tools</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

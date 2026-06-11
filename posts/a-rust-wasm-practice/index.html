@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Rust WASM: Building Conway&#x27;s Game of Life
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Rust WASM: Building Conway&#x27;s Game of Life" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Rust WASM: Building Conway&#x27;s Game of Life
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2025-04-01</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/rust/"
+                                       class="post-tag">rust</a>
+                                
+                                    <a href="https://kaifengzheng.github.io/tags/wasm/"
+                                       class="post-tag">wasm</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="rust-wasm-building-conway-s-game-of-life">Rust WASM: Building Conway's Game of Life</h1>
+<p>I've heard of wasm for quite a while, and finally decided to try it out.</p>
+<p>This blog briefly writes the process of the practice.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Should know basic web development stuff, since wasm is run inside a browser (mostly).</p>
+<ul>
+<li>HTML</li>
+<li>CSS</li>
+<li>JavaScript</li>
+</ul>
+<p>There are technically 2 ways of using rust wasm.</p>
+<ol>
+<li>Build the whole project in Rust, or</li>
+<li>Rust the heavy part of the project and use it as a lib.</li>
+</ol>
+<p>Currently the latter one is preferred.</p>
+<h2 id="game-of-life">Game of Life</h2>
+<p>The practice is going to focus on implementing Conway's Game of Life in Rust, building it to wasm and use it in JS.</p>
+<p>The rules of the game are:</p>
+<ol>
+<li>Any live cell with fewer than two live neighbours dies, as if by underpopulation.</li>
+<li>Any live cell with two or three live neighbours lives on to the next generation.</li>
+<li>Any live cell with more than three live neighbours dies, as if by overpopulation.</li>
+<li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
+</ol>
+<p>For more info: https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life</p>
+<h2 id="implementation">Implementation</h2>
+<h3 id="rust-part">Rust Part</h3>
+<p>Rust comes with powerful tools like <code>wasm-pack</code>, <code>wasm-bindgen</code> and more for wasm programming.</p>
+<p>We use <code>#[wasm-bindgen]</code> macro to make complier generates wasm-related files (js API file, wasm memory file, ts file and so on) when we use <code>wasm-pack build</code> to build our rust wasm lib.</p>
+<p>I'll simply copy the code as follows:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> fixedbitset</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">FixedBitSet</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> wasm_bindgen</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">prelude</span><span style="color: #E06C75;">::*</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#[wasm_bindgen]</span></span>
+<span class="giallo-l"><span>#[repr(</span><span style="color: #E5C07B;">u8</span><span>)]</span></span>
+<span class="giallo-l"><span>#[derive(</span><span style="color: #E5C07B;">Clone</span><span>,</span><span style="color: #E5C07B;"> Copy</span><span>,</span><span style="color: #E5C07B;"> Debug</span><span>,</span><span style="color: #E5C07B;"> PartialEq</span><span>,</span><span style="color: #E5C07B;"> Eq</span><span>)]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> enum</span><span style="color: #E5C07B;"> Cell</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Dead</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Alive</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 1</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#[wasm_bindgen]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> struct</span><span style="color: #E5C07B;"> Universe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    width</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    height</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    cells</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> FixedBitSet</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Universe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> get_index</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>,</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>,</span><span style="color: #C6CCD7;"> column</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> usize</span><span> {</span></span>
+<span class="giallo-l"><span>        (</span><span style="color: #C6CCD7;">row</span><span style="color: #E06C75;"> * self.</span><span>width </span><span style="color: #E06C75;">+</span><span style="color: #C6CCD7;"> column</span><span>)</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> usize</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> live_neighbor_count</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>,</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>,</span><span style="color: #C6CCD7;"> column</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> u8</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let mut</span><span style="color: #C6CCD7;"> count</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span style="color: #C6CCD7;"> delta_row</span><span style="color: #E06C75;"> in</span><span> [</span><span style="color: #E06C75;">self.</span><span>height </span><span style="color: #E06C75;">-</span><span style="color: #56B6C2;"> 1</span><span>,</span><span style="color: #56B6C2;"> 0</span><span>,</span><span style="color: #56B6C2;"> 1</span><span>] {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            for</span><span style="color: #C6CCD7;"> delta_col</span><span style="color: #E06C75;"> in</span><span> [</span><span style="color: #E06C75;">self.</span><span>width </span><span style="color: #E06C75;">-</span><span style="color: #56B6C2;"> 1</span><span>,</span><span style="color: #56B6C2;"> 0</span><span>,</span><span style="color: #56B6C2;"> 1</span><span>] {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                if</span><span style="color: #C6CCD7;"> delta_row</span><span style="color: #E06C75;"> ==</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;"> &amp;&amp;</span><span style="color: #C6CCD7;"> delta_col</span><span style="color: #E06C75;"> ==</span><span style="color: #56B6C2;"> 0</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    continue</span><span>;</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                let</span><span style="color: #C6CCD7;"> neighbor_row</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">row</span><span style="color: #E06C75;"> +</span><span style="color: #C6CCD7;"> delta_row</span><span>)</span><span style="color: #E06C75;"> % self.</span><span>height;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                let</span><span style="color: #C6CCD7;"> neighbor_col</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">column</span><span style="color: #E06C75;"> +</span><span style="color: #C6CCD7;"> delta_col</span><span>)</span><span style="color: #E06C75;"> % self.</span><span>width;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                let</span><span style="color: #C6CCD7;"> idx</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">get_index</span><span>(</span><span style="color: #C6CCD7;">neighbor_row</span><span>,</span><span style="color: #C6CCD7;"> neighbor_col</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                count</span><span style="color: #E06C75;"> += self.</span><span>cells[</span><span style="color: #C6CCD7;">idx</span><span>]</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> u8</span><span>;</span></span>
+<span class="giallo-l"><span>            }</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        count</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#[wasm_bindgen]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Universe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> new</span><span>()</span><span style="color: #E06C75;"> -&gt; Self</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 64</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> height</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 64</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> sz</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">width</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> height</span><span>)</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> usize</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let mut</span><span style="color: #C6CCD7;"> cells</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> FixedBitSet</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">with_capacity</span><span>(</span><span style="color: #C6CCD7;">sz</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..</span><span style="color: #C6CCD7;">sz</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            cells</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set</span><span>(</span><span style="color: #C6CCD7;">i</span><span>,</span><span style="color: #61AFEF;"> js_sys</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">Math</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">random</span><span>() &lt;</span><span style="color: #56B6C2;"> 0</span><span>.</span><span style="color: #56B6C2;">5</span><span>);</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        Self</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            width</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            height</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            cells</span><span>,</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> width</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> u32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>width</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> height</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> u32</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>height</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> cells</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt; *</span><span style="color: #61AFEF;">const</span><span style="color: #E5C07B;"> usize</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>cells</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_slice</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_ptr</span><span>()</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> tick</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let mut</span><span style="color: #C6CCD7;"> next</span><span style="color: #E06C75;"> = self.</span><span>cells</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">clone</span><span>();</span></span>
+<span class="giallo-l"><span>        </span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..self.</span><span>height {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            for</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..self.</span><span>width {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                let</span><span style="color: #C6CCD7;"> idx</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">get_index</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                let</span><span style="color: #C6CCD7;"> cell</span><span style="color: #E06C75;"> = self.</span><span>cells[</span><span style="color: #C6CCD7;">idx</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                let</span><span style="color: #C6CCD7;"> live_neigbors</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">live_neighbor_count</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                next</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set</span><span>(</span><span style="color: #C6CCD7;">idx</span><span>,</span><span style="color: #E06C75;"> match</span><span> (</span><span style="color: #C6CCD7;">cell</span><span>,</span><span style="color: #C6CCD7;"> live_neigbors</span><span>) {</span></span>
+<span class="giallo-l"><span>                    (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #C6CCD7;"> x</span><span>)</span><span style="color: #E06C75;"> if</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> &lt;</span><span style="color: #56B6C2;"> 2</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> false</span><span>,</span></span>
+<span class="giallo-l"><span>                    (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #56B6C2;"> 2</span><span>)</span><span style="color: #E06C75;"> |</span><span> (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #56B6C2;"> 3</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> true</span><span>,</span></span>
+<span class="giallo-l"><span>                    (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #C6CCD7;"> x</span><span>)</span><span style="color: #E06C75;"> if</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> &gt;</span><span style="color: #56B6C2;"> 3</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> false</span><span>,</span></span>
+<span class="giallo-l"><span>                    (</span><span style="color: #56B6C2;">false</span><span>,</span><span style="color: #56B6C2;"> 3</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> true</span><span>,</span></span>
+<span class="giallo-l"><span>                    (</span><span style="color: #C6CCD7;">otherwise</span><span>,</span><span style="color: #C6CCD7;"> _</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #C6CCD7;"> otherwise</span><span>,</span></span>
+<span class="giallo-l"><span>                });</span></span>
+<span class="giallo-l"><span>            }</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>cells </span><span style="color: #E06C75;">=</span><span style="color: #C6CCD7;"> next</span><span>;</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="javascript-part">JavaScript Part</h3>
+<p>With the functional lib we built, now all we have to do is to use it to display the animation on the browser.</p>
+<p>A basic web app is consist of:</p>
+<ul>
+<li>HTML: Defining the layout of the website</li>
+<li>CSS: Defining the style of the website</li>
+<li>JavaScript: Handling any user input and logical changes.</li>
+</ul>
+<p>For HTML and CSS:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="html"><span class="giallo-l"><span>&lt;!</span><span style="color: #E5C07B;">DOCTYPE</span><span style="color: #D19A66;"> html</span><span>&gt;</span></span>
+<span class="giallo-l"><span>&lt;</span><span style="color: #E5C07B;">html</span><span>&gt;</span></span>
+<span class="giallo-l"><span>  &lt;</span><span style="color: #E5C07B;">head</span><span>&gt;</span></span>
+<span class="giallo-l"><span>    &lt;</span><span style="color: #E5C07B;">meta</span><span style="color: #D19A66;"> charset</span><span>=&quot;</span><span style="color: #98C379;">utf-8</span><span>&quot;&gt;</span></span>
+<span class="giallo-l"><span>    &lt;</span><span style="color: #E5C07B;">title</span><span>&gt;Hello wasm-pack!&lt;/</span><span style="color: #E5C07B;">title</span><span>&gt;</span></span>
+<span class="giallo-l"><span>  &lt;/</span><span style="color: #E5C07B;">head</span><span>&gt;</span></span>
+<span class="giallo-l"><span>  &lt;</span><span style="color: #E5C07B;">body</span><span>&gt;</span></span>
+<span class="giallo-l"><span>    &lt;</span><span style="color: #E5C07B;">canvas</span><span style="color: #D19A66;"> id</span><span>=&quot;</span><span style="color: #98C379;">game-of-life-canvas</span><span>&quot;&gt;&lt;/</span><span style="color: #E5C07B;">canvas</span><span>&gt;</span></span>
+<span class="giallo-l"><span>    &lt;</span><span style="color: #E5C07B;">script</span><span style="color: #D19A66;"> src</span><span>=&quot;</span><span style="color: #98C379;">./bootstrap.js</span><span>&quot;&gt;&lt;/</span><span style="color: #E5C07B;">script</span><span>&gt;</span></span>
+<span class="giallo-l"><span>  &lt;/</span><span style="color: #E5C07B;">body</span><span>&gt;</span></span>
+<span class="giallo-l"><span>  &lt;</span><span style="color: #E5C07B;">style</span><span>&gt;</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    body</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      position</span><span>:</span><span style="color: #56B6C2;"> absolute</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      top</span><span>:</span><span style="color: #56B6C2;"> 0</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      left</span><span>:</span><span style="color: #56B6C2;"> 0</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      width</span><span>:</span><span style="color: #56B6C2;"> 100</span><span style="color: #E06C75;">%</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      height</span><span>:</span><span style="color: #56B6C2;"> 100</span><span style="color: #E06C75;">%</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      display</span><span>:</span><span style="color: #56B6C2;"> flex</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      flex-direction</span><span>:</span><span style="color: #56B6C2;"> column</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      align-items</span><span>:</span><span style="color: #56B6C2;"> center</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">      justify-content</span><span>:</span><span style="color: #56B6C2;"> center</span><span>;</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>  &lt;/</span><span style="color: #E5C07B;">style</span><span>&gt;</span></span>
+<span class="giallo-l"><span>&lt;/</span><span style="color: #E5C07B;">html</span><span>&gt;</span></span></code></pre>
+<p>For JS:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="javascript"><span class="giallo-l"><span style="color: #E06C75;">import</span><span> {</span><span style="color: #C6CCD7;"> Universe</span><span>,</span><span style="color: #C6CCD7;"> Cell</span><span> }</span><span style="color: #E06C75;"> from</span><span> &quot;</span><span style="color: #98C379;">wasm-game-of-life</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Import the linear memory space of wasm.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">import</span><span> {</span><span style="color: #C6CCD7;"> memory</span><span> }</span><span style="color: #E06C75;"> from</span><span> &quot;</span><span style="color: #98C379;">wasm-game-of-life/wasm_game_of_life_bg.wasm</span><span>&quot;;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> CELL_SIZE</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 5</span><span>;</span><span style="color: #5F6672;font-style: italic;"> // px</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> GRID_COLOR</span><span style="color: #E06C75;"> =</span><span> &quot;</span><span style="color: #98C379;">#CCCCCC</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> DEAD_COLOR</span><span style="color: #E06C75;"> =</span><span> &quot;</span><span style="color: #98C379;">#FFFFFF</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> ALIVE_COLOR</span><span style="color: #E06C75;"> =</span><span> &quot;</span><span style="color: #98C379;">#000000</span><span>&quot;;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Construct the universe, and get its width and height.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> universe</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> Universe</span><span>.</span><span style="color: #B57EDC;">new</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> universe</span><span>.</span><span style="color: #B57EDC;">width</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> height</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> universe</span><span>.</span><span style="color: #B57EDC;">height</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Give the canvas room for all of our cells and a 1px border</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// around each of them.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> canvas</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> document</span><span>.</span><span style="color: #B57EDC;">getElementById</span><span>(&quot;</span><span style="color: #98C379;">game-of-life-canvas</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">canvas</span><span>.</span><span style="color: #C6CCD7;">height</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> height</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">canvas</span><span>.</span><span style="color: #C6CCD7;">width</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> ctx</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> canvas</span><span>.</span><span style="color: #B57EDC;">getContext</span><span>(&#39;</span><span style="color: #98C379;">2d</span><span>&#39;);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> renderLoop</span><span style="color: #E06C75;"> =</span><span> ()</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span>.</span><span style="color: #B57EDC;">tick</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    drawGrid</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    drawCells</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    requestAnimationFrame</span><span>(</span><span style="color: #C6CCD7;">renderLoop</span><span>);</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> drawGrid</span><span style="color: #E06C75;"> =</span><span> ()</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    ctx</span><span>.</span><span style="color: #B57EDC;">beginPath</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    ctx</span><span>.</span><span style="color: #C6CCD7;">strokeStyle</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> GRID_COLOR</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // Vertical lines.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span> (</span><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> &lt;=</span><span style="color: #C6CCD7;"> width</span><span>;</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;">++</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        ctx</span><span>.</span><span style="color: #B57EDC;">moveTo</span><span>(</span><span style="color: #C6CCD7;">i</span><span style="color: #E06C75;"> *</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>,</span><span style="color: #56B6C2;"> 0</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        ctx</span><span>.</span><span style="color: #B57EDC;">lineTo</span><span>(</span><span style="color: #C6CCD7;">i</span><span style="color: #E06C75;"> *</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>, (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> height</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // Horizontal lines.</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span> (</span><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> j</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span><span style="color: #C6CCD7;"> j</span><span style="color: #E06C75;"> &lt;=</span><span style="color: #C6CCD7;"> height</span><span>;</span><span style="color: #C6CCD7;"> j</span><span style="color: #E06C75;">++</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        ctx</span><span>.</span><span style="color: #B57EDC;">moveTo</span><span>(</span><span style="color: #56B6C2;">0</span><span>,</span><span style="color: #C6CCD7;"> j</span><span style="color: #E06C75;"> *</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        ctx</span><span>.</span><span style="color: #B57EDC;">lineTo</span><span>((</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>,</span><span style="color: #C6CCD7;"> j</span><span style="color: #E06C75;"> *</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    ctx</span><span>.</span><span style="color: #B57EDC;">stroke</span><span>();</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> getIndex</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> column</span><span>)</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    return</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> +</span><span style="color: #C6CCD7;"> column</span><span>;</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> drawCells</span><span style="color: #E06C75;"> =</span><span> ()</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // Accessing the buffer of wasm.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> cellsPtr</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> universe</span><span>.</span><span style="color: #B57EDC;">cells</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> cells</span><span style="color: #E06C75;"> = new</span><span style="color: #B57EDC;"> Uint8Array</span><span>(</span><span style="color: #C6CCD7;">memory</span><span>.</span><span style="color: #C6CCD7;">buffer</span><span>,</span><span style="color: #C6CCD7;"> cellsPtr</span><span>,</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> height</span><span style="color: #E06C75;"> /</span><span style="color: #56B6C2;"> 8</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    ctx</span><span>.</span><span style="color: #B57EDC;">beginPath</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span> (</span><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;"> &lt;</span><span style="color: #C6CCD7;"> height</span><span>;</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;">++</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span> (</span><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;"> &lt;</span><span style="color: #C6CCD7;"> width</span><span>;</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;">++</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            const</span><span style="color: #C6CCD7;"> idx</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> getIndex</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            ctx</span><span>.</span><span style="color: #C6CCD7;">fillStyle</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> cells</span><span>[</span><span style="color: #C6CCD7;">idx</span><span>]</span><span style="color: #E06C75;"> ===</span><span style="color: #C6CCD7;"> Cell</span><span>.</span><span style="color: #C6CCD7;">Dead</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                ?</span><span style="color: #C6CCD7;"> DEAD_COLOR</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                :</span><span style="color: #C6CCD7;"> ALIVE_COLOR</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            ctx</span><span>.</span><span style="color: #B57EDC;">fillRect</span><span>(</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                col</span><span style="color: #E06C75;"> *</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                row</span><span style="color: #E06C75;"> *</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                CELL_SIZE</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                CELL_SIZE</span></span>
+<span class="giallo-l"><span>            );</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    ctx</span><span>.</span><span style="color: #B57EDC;">stroke</span><span>();</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">drawGrid</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">drawCells</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">requestAnimationFrame</span><span>(</span><span style="color: #C6CCD7;">renderLoop</span><span>);</span></span></code></pre><h2 id="testing">Testing</h2>
+<p>Example test.rs:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Only test for target: &quot;wasm-unknown-unknown&quot;</span></span>
+<span class="giallo-l"><span>#![cfg(target_arch </span><span style="color: #E06C75;">=</span><span> &quot;</span><span style="color: #98C379;">wasm32</span><span>&quot;)]</span></span>
+<span class="giallo-l"><span>#![cfg(test)]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Use wasm_bindgen_test and our [`Universe`];</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> wasm_bindgen_test</span><span style="color: #E06C75;">::*</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> wasm_game_of_life</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Universe</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Configure our test to run in the browser.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm_bindgen_test_configure!</span><span>(</span><span style="color: #C6CCD7;">run_in_browser</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> input_spaceship</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Universe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let mut</span><span style="color: #C6CCD7;"> universe</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Universe</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_width</span><span>(</span><span style="color: #56B6C2;">6</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_height</span><span>(</span><span style="color: #56B6C2;">6</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_cells</span><span>(</span><span style="color: #E06C75;">&amp;</span><span>[(</span><span style="color: #56B6C2;">1</span><span>,</span><span style="color: #56B6C2;">2</span><span>), (</span><span style="color: #56B6C2;">2</span><span>,</span><span style="color: #56B6C2;">3</span><span>), (</span><span style="color: #56B6C2;">3</span><span>,</span><span style="color: #56B6C2;">1</span><span>), (</span><span style="color: #56B6C2;">3</span><span>,</span><span style="color: #56B6C2;">2</span><span>), (</span><span style="color: #56B6C2;">3</span><span>,</span><span style="color: #56B6C2;">3</span><span>)]);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> expected_spaceship</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Universe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let mut</span><span style="color: #C6CCD7;"> universe</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Universe</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_width</span><span>(</span><span style="color: #56B6C2;">6</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_height</span><span>(</span><span style="color: #56B6C2;">6</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_cells</span><span>(</span><span style="color: #E06C75;">&amp;</span><span>[(</span><span style="color: #56B6C2;">2</span><span>,</span><span style="color: #56B6C2;">1</span><span>), (</span><span style="color: #56B6C2;">2</span><span>,</span><span style="color: #56B6C2;">3</span><span>), (</span><span style="color: #56B6C2;">3</span><span>,</span><span style="color: #56B6C2;">2</span><span>), (</span><span style="color: #56B6C2;">3</span><span>,</span><span style="color: #56B6C2;">3</span><span>), (</span><span style="color: #56B6C2;">4</span><span>,</span><span style="color: #56B6C2;">2</span><span>)]);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Similar to #[test]</span></span>
+<span class="giallo-l"><span>#[wasm_bindgen_test]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> test_tick</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let mut</span><span style="color: #C6CCD7;"> input_universe</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> input_spaceship</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> expected_universe</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> expected_spaceship</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    input_universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">tick</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    assert_eq!</span><span>(</span><span style="color: #C6CCD7;">input_universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">get_cells</span><span>(),</span><span style="color: #C6CCD7;"> expected_universe</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">get_cells</span><span>());</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>By setting the test rs file, we can simply <code>wasm-pack test --chrome --headless</code> to test our test suite.</p>
+<p><code>--chrome</code> means we prefer to run the test in Google Chrome, so be sure the latest Google Chrome is downloaded.</p>
+<p><code>--headless</code> means we prefer to test without opening the browser and viewing.</p>
+<h2 id="debugging">Debugging</h2>
+<h3 id="log-for-panics">Log for Panics</h3>
+<p>If our rust wasm panics for unknown reasons, we would like to at least be aware of the location of panicking.</p>
+<p>We could achieve this by using the crate <code>console_error_panic_hook</code>.</p>
+<p>Usage is simply:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Place this in the init function.</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// `set_once` ensure `set_hook` is called once.</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">console_error_panic_hook</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">set_once</span><span>();</span></span></code></pre>
+<p>Then, if the rust part panics, we'll get messages like (build with <code>wasm-pack build --dev</code>):</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="plain"><span class="giallo-l"><span>panicked at src/lib.rs:65:9:</span></span>
+<span class="giallo-l"><span>explicit panic</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Stack:</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>@</span></span>
+<span class="giallo-l"><span>logError@</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[__wbg_new_8a6f238a6ece86ea externref shim]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[console_error_panic_hook::Error::new::h19e56b4cb73b36b1]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[console_error_panic_hook::hook_impl::hbfe233a683db229c]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[console_error_panic_hook::hook::h9ea87a8daf4cfd59]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[core::ops::function::Fn::call::h9d1dc855776bf28e]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[std::panicking::rust_panic_with_hook::h9ea01914b5d92659]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[std::panicking::begin_panic::{{closure}}::h1965b49f537d1c88]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[std::sys::backtrace::__rust_end_short_backtrace::hdeabdd4295ec7969]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[std::panicking::begin_panic::hbacf3f38466eeebe]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[wasm_game_of_life::Universe::new::hc5d33d50da932d85]@[wasm code]</span></span>
+<span class="giallo-l"><span>wasm_game_of_life.wasm.wasm-function[universe_new]@[wasm code]</span></span>
+<span class="giallo-l"><span>new@</span></span>
+<span class="giallo-l"><span>@</span></span></code></pre><h3 id="log-error-messages-to-console">Log Error Messages to Console</h3>
+<p>It's useful to log info if something went wrong. How do we log then?</p>
+<p>We need another dependency, <code>web-sys</code>, which provides us the <code>console::log</code> API.</p>
+<p>Well, simple as that. Then we can write a macro to easy up the coding:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #B57EDC;">macro_rules! log</span><span> {</span></span>
+<span class="giallo-l"><span>    (</span><span style="color: #E06C75;"> $</span><span>(</span><span style="color: #E06C75;"> $</span><span style="color: #C6CCD7;">t</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;">tt</span><span> )</span><span style="color: #E06C75;">*</span><span> )</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        web_sys</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">console</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">log_1</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #B57EDC;">format!</span><span>(</span><span style="color: #E06C75;"> $</span><span>(</span><span style="color: #E06C75;">$</span><span style="color: #C6CCD7;">t</span><span>)</span><span style="color: #E06C75;">*</span><span> )</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">into</span><span>());</span></span>
+<span class="giallo-l"><span>    };</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Log while ticking.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">log!</span><span>(</span></span>
+<span class="giallo-l"><span>    &quot;</span><span style="color: #98C379;">cell[</span><span>{}</span><span style="color: #98C379;">, </span><span>{}</span><span style="color: #98C379;">] is initially </span><span>{}</span><span style="color: #98C379;"> and has </span><span>{}</span><span style="color: #98C379;"> live neighbors</span><span>&quot;,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    row</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    col</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    cell</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    live_neigbors</span></span>
+<span class="giallo-l"><span>);</span></span></code></pre><h3 id="use-a-debugger">Use a Debugger</h3>
+<p>Either by placing an <code>debugger</code> in advanced in <code>.js</code> or by clicking in the sources interface of the browser is ok for js.</p>
+<p>However, there's currently no mature debugging tool for rust wasm. We may end up stepping into raw wasm instructions rather than the Rust source text we authored.</p>
+<h2 id="interaction-between-rust-and-js">Interaction between Rust and JS</h2>
+<p>We are going to add 2 interactions:</p>
+<ol>
+<li>Play and pause button, and</li>
+<li>Toggle cell state by clicking</li>
+</ol>
+<h3 id="add-a-button">Add a Button</h3>
+<p>Add a button in <code>.html</code> with <code>&lt;button id="play-pause"&gt;&lt;/button&gt;</code>.</p>
+<p>In <code>index.js</code>, add the logic code:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="javascript"><span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> playPauseButton</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> document</span><span>.</span><span style="color: #B57EDC;">getElementById</span><span>(&quot;</span><span style="color: #98C379;">play-pause</span><span>&quot;);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> isPaused</span><span style="color: #E06C75;"> =</span><span> ()</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    return</span><span style="color: #C6CCD7;"> animationId</span><span style="color: #E06C75;"> ===</span><span style="color: #56B6C2;"> null</span><span>;</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> play</span><span style="color: #E06C75;"> =</span><span> ()</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    playPauseButton</span><span>.</span><span style="color: #C6CCD7;">textContent</span><span style="color: #E06C75;"> =</span><span> &quot;</span><span style="color: #98C379;">⏸</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    renderLoop</span><span>();</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #B57EDC;"> pause</span><span style="color: #E06C75;"> =</span><span> ()</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    playPauseButton</span><span>.</span><span style="color: #C6CCD7;">textContent</span><span style="color: #E06C75;"> =</span><span> &quot;</span><span style="color: #98C379;">▶</span><span>&quot;;</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    cancelAnimationFrame</span><span>(</span><span style="color: #C6CCD7;">animationId</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    animationId</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> null</span><span>;</span><span style="color: #5F6672;font-style: italic;"> // This would be set in `renderLoop`.</span></span>
+<span class="giallo-l"><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">playPauseButton</span><span>.</span><span style="color: #B57EDC;">addEventListener</span><span>(&quot;</span><span style="color: #98C379;">click</span><span>&quot;,</span><span style="color: #C6CCD7;"> event</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    if</span><span> (</span><span style="color: #B57EDC;">isPaused</span><span>()) {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        play</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span><span style="color: #E06C75;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        pause</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>});</span></span></code></pre><h3 id="toggling-cells">Toggling Cells</h3>
+<p>First we have to impl the toggle method on the rust side.</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Universe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> toggle_cell</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>,</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>,</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> idx</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">get_index</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>cells</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set</span><span>(</span><span style="color: #C6CCD7;">idx</span><span>,</span><span style="color: #E06C75;"> !self.</span><span>cells[</span><span style="color: #C6CCD7;">idx</span><span>]);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Then, we add the toggling logic code in js.</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="javascript"><span class="giallo-l"><span style="color: #C6CCD7;">canvas</span><span>.</span><span style="color: #B57EDC;">addEventListener</span><span>(&quot;</span><span style="color: #98C379;">click</span><span>&quot;,</span><span style="color: #C6CCD7;"> event</span><span style="color: #61AFEF;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> boundingRect</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> canvas</span><span>.</span><span style="color: #B57EDC;">getBoundingClientRect</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> scaleX</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> canvas</span><span>.</span><span style="color: #C6CCD7;">width</span><span style="color: #E06C75;"> /</span><span style="color: #C6CCD7;"> boundingRect</span><span>.</span><span style="color: #C6CCD7;">width</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> scaleY</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> canvas</span><span>.</span><span style="color: #C6CCD7;">height</span><span style="color: #E06C75;"> /</span><span style="color: #C6CCD7;"> boundingRect</span><span>.</span><span style="color: #C6CCD7;">height</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> canvasLeft</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">event</span><span>.</span><span style="color: #C6CCD7;">clientX</span><span style="color: #E06C75;"> -</span><span style="color: #C6CCD7;"> boundingRect</span><span>.</span><span style="color: #C6CCD7;">left</span><span>)</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> scaleX</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> canvasTop</span><span style="color: #E06C75;"> =</span><span> (</span><span style="color: #C6CCD7;">event</span><span>.</span><span style="color: #C6CCD7;">clientY</span><span style="color: #E06C75;"> -</span><span style="color: #C6CCD7;"> boundingRect</span><span>.</span><span style="color: #C6CCD7;">top</span><span>)</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> scaleY</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> Math</span><span>.</span><span style="color: #B57EDC;">min</span><span>(</span><span style="color: #C6CCD7;">Math</span><span>.</span><span style="color: #B57EDC;">floor</span><span>(</span><span style="color: #C6CCD7;">canvasTop</span><span style="color: #E06C75;"> /</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>)),</span><span style="color: #C6CCD7;"> height</span><span style="color: #E06C75;"> -</span><span style="color: #56B6C2;"> 1</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    const</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> Math</span><span>.</span><span style="color: #B57EDC;">min</span><span>(</span><span style="color: #C6CCD7;">Math</span><span>.</span><span style="color: #B57EDC;">floor</span><span>(</span><span style="color: #C6CCD7;">canvasLeft</span><span style="color: #E06C75;"> /</span><span> (</span><span style="color: #C6CCD7;">CELL_SIZE</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>),</span><span style="color: #C6CCD7;"> width</span><span style="color: #E06C75;"> -</span><span style="color: #56B6C2;"> 1</span><span>));</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    universe</span><span>.</span><span style="color: #B57EDC;">toggle_cell</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    drawCells</span><span>();</span></span>
+<span class="giallo-l"><span>})</span></span></code></pre><h2 id="time-profiling">Time Profiling</h2>
+<h3 id="counting-fps-by-performance-now">Counting FPS by <code>performance.now()</code></h3>
+<p>Add dependency <code>web-sys</code> with features <code>["Window", "Performance"]</code> if would like to count fps in Rust.</p>
+<p>Or we can simply count it in js:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="javascript"><span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">const</span><span style="color: #C6CCD7;"> fps</span><span style="color: #E06C75;"> = new</span><span style="color: #61AFEF;"> class</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    constructor</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        this</span><span>.</span><span style="color: #C6CCD7;">fps</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> document</span><span>.</span><span style="color: #B57EDC;">getElementById</span><span>(&quot;</span><span style="color: #98C379;">fps</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span style="color: #E06C75;"> =</span><span> [];</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        this</span><span>.</span><span style="color: #C6CCD7;">lastFrameTimeStamp</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> performance</span><span>.</span><span style="color: #B57EDC;">now</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    render</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        const</span><span style="color: #C6CCD7;"> now</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> performance</span><span>.</span><span style="color: #B57EDC;">now</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        const</span><span style="color: #C6CCD7;"> delta</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> now</span><span style="color: #E06C75;"> - this</span><span>.</span><span style="color: #C6CCD7;">lastFrameTimeStamp</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        this</span><span>.</span><span style="color: #C6CCD7;">lastFrameTimeStamp</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> now</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        const</span><span style="color: #C6CCD7;"> fps</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 1</span><span style="color: #E06C75;"> /</span><span style="color: #C6CCD7;"> delta</span><span style="color: #E06C75;"> *</span><span style="color: #56B6C2;"> 1000</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>.</span><span style="color: #B57EDC;">push</span><span>(</span><span style="color: #C6CCD7;">fps</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if</span><span> (</span><span style="color: #E06C75;">this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>.</span><span style="color: #C6CCD7;">length</span><span style="color: #E06C75;"> &gt;</span><span style="color: #56B6C2;"> 100</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>.</span><span style="color: #B57EDC;">shift</span><span>();</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> min</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> Infinity</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> max</span><span style="color: #E06C75;"> = -</span><span style="color: #56B6C2;">Infinity</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> sum</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span> (</span><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 0</span><span>;</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> &lt; this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>.</span><span style="color: #C6CCD7;">length</span><span>;</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;">++</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            sum</span><span style="color: #E06C75;"> += this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>[</span><span style="color: #C6CCD7;">i</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            min</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> Math</span><span>.</span><span style="color: #B57EDC;">min</span><span>(</span><span style="color: #E06C75;">this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>[</span><span style="color: #C6CCD7;">i</span><span>],</span><span style="color: #C6CCD7;"> min</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            max</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> Math</span><span>.</span><span style="color: #B57EDC;">max</span><span>(</span><span style="color: #E06C75;">this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>[</span><span style="color: #C6CCD7;">i</span><span>],</span><span style="color: #C6CCD7;"> max</span><span>);</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> mean</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> sum</span><span style="color: #E06C75;"> / this</span><span>.</span><span style="color: #C6CCD7;">frames</span><span>.</span><span style="color: #C6CCD7;">length</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        this</span><span>.</span><span style="color: #C6CCD7;">fps</span><span>.</span><span style="color: #C6CCD7;">textContent</span><span style="color: #E06C75;"> =</span><span> `</span></span>
+<span class="giallo-l"><span style="color: #98C379;">Frames per Second:</span></span>
+<span class="giallo-l"><span style="color: #98C379;">         latest = </span><span>${</span><span style="color: #C6CCD7;">Math</span><span>.</span><span style="color: #B57EDC;">round</span><span>(</span><span style="color: #C6CCD7;">fps</span><span>)}</span></span>
+<span class="giallo-l"><span style="color: #98C379;">avg of last 100 = </span><span>${</span><span style="color: #C6CCD7;">Math</span><span>.</span><span style="color: #B57EDC;">round</span><span>(</span><span style="color: #C6CCD7;">mean</span><span>)}</span></span>
+<span class="giallo-l"><span style="color: #98C379;">min of last 100 = </span><span>${</span><span style="color: #C6CCD7;">Math</span><span>.</span><span style="color: #B57EDC;">round</span><span>(</span><span style="color: #C6CCD7;">min</span><span>)}</span></span>
+<span class="giallo-l"><span style="color: #98C379;">max of last 100 = </span><span>${</span><span style="color: #C6CCD7;">Math</span><span>.</span><span style="color: #B57EDC;">round</span><span>(</span><span style="color: #C6CCD7;">max</span><span>)}</span></span>
+<span class="giallo-l"><span>`.</span><span style="color: #B57EDC;">trim</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>};</span></span></code></pre>
+<p>And call <code>fps.render()</code> in <code>renderLoop</code>.</p>
+<h3 id="set-timer-for-universe-tick">Set Timer for <code>Universe::tick</code></h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> struct</span><span style="color: #E5C07B;"> Timer</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    name</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;</span><span style="color: #E5C07B;"> Timer</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> new</span><span>(</span><span style="color: #C6CCD7;">name</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>)</span><span style="color: #E06C75;"> -&gt; Self</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        console</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">time_with_label</span><span>(</span><span style="color: #C6CCD7;">name</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        Self</span><span> {</span><span style="color: #C6CCD7;"> name</span><span> }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;</span><span style="color: #E5C07B;"> Drop</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> Timer</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> drop</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        console</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">time_end_with_label</span><span>(</span><span style="color: #E06C75;">self.</span><span>name);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>By that the timer ticking will show outputs in the js console.</p>
+<p>(TODO: Does it brings more info in the recorded frames(waterfalls)?)</p>
+<h3 id="enhancing-performance">Enhancing Performance</h3>
+<p>With the timer above, we can inspect the time cost of each function calls.</p>
+<p>For some reason my bottleneck is different from the project guide, but I'll first enhance the render part to keep the same with the guide anyway, which is to skip <code>fillRect</code> when it's not necessary.</p>
+<p>The bottleneck of my implementation is <code>Universe::tick</code>. Let's add more timer in between:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> tick</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>,</span><span style="color: #C6CCD7;"> times</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let mut</span><span style="color: #C6CCD7;"> next</span><span style="color: #E06C75;"> =</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> _timer</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Timer</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(&quot;</span><span style="color: #98C379;">allocate next cells</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>cells</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">clone</span><span>()</span></span>
+<span class="giallo-l"><span>        };</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span style="color: #C6CCD7;"> _</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..</span><span style="color: #C6CCD7;">times</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> _timer</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Timer</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(&quot;</span><span style="color: #98C379;">new_genaration</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            for</span><span style="color: #C6CCD7;"> row</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..self.</span><span>height {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                for</span><span style="color: #C6CCD7;"> col</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..self.</span><span>width {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> idx</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">get_index</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> cell</span><span style="color: #E06C75;"> = self.</span><span>cells[</span><span style="color: #C6CCD7;">idx</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> live_neigbors</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">live_neighbor_count</span><span>(</span><span style="color: #C6CCD7;">row</span><span>,</span><span style="color: #C6CCD7;"> col</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> next_cell</span><span style="color: #E06C75;"> = match</span><span> (</span><span style="color: #C6CCD7;">cell</span><span>,</span><span style="color: #C6CCD7;"> live_neigbors</span><span>) {</span></span>
+<span class="giallo-l"><span>                        (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #C6CCD7;"> x</span><span>)</span><span style="color: #E06C75;"> if</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> &lt;</span><span style="color: #56B6C2;"> 2</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> false</span><span>,</span></span>
+<span class="giallo-l"><span>                        (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #56B6C2;"> 2</span><span>)</span><span style="color: #E06C75;"> |</span><span> (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #56B6C2;"> 3</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> true</span><span>,</span></span>
+<span class="giallo-l"><span>                        (</span><span style="color: #56B6C2;">true</span><span>,</span><span style="color: #C6CCD7;"> x</span><span>)</span><span style="color: #E06C75;"> if</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> &gt;</span><span style="color: #56B6C2;"> 3</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> false</span><span>,</span></span>
+<span class="giallo-l"><span>                        (</span><span style="color: #56B6C2;">false</span><span>,</span><span style="color: #56B6C2;"> 3</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #56B6C2;"> true</span><span>,</span></span>
+<span class="giallo-l"><span>                        (</span><span style="color: #C6CCD7;">otherwise</span><span>,</span><span style="color: #C6CCD7;"> _</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #C6CCD7;"> otherwise</span><span>,</span></span>
+<span class="giallo-l"><span>                    };</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                    next</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set</span><span>(</span><span style="color: #C6CCD7;">idx</span><span>,</span><span style="color: #C6CCD7;"> next_cell</span><span>);</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span>            }</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> _timer</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Timer</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(&quot;</span><span style="color: #98C379;">free old cells</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>cells </span><span style="color: #E06C75;">=</span><span style="color: #C6CCD7;"> next</span><span>;</span></span>
+<span class="giallo-l"><span>    }</span></span></code></pre>
+<p>TODO: for some reason I don't see the timer with these labels in the dev tools.</p>
+<p>Any way, according to the flamegraph, the most time consuming function call is <code>Universe::live_neighbor_count</code> (check out the orange bar in the pic below).</p>
+<p><img src="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/./Task%20Archive/images/wasm%20count%20neighbor%20flamegraph.png" alt="Flamegraph showing the time-consuming function call in Universe::live_neighbor_count" /></p>
+<h2 id="shrinking-binary-size">Shrinking Binary Size</h2>
+<p>Use <code>wasm-opt</code> tool to shrink code size:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #5F6672;font-style: italic;"># Optimize for size.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm-opt</span><span style="color: #56B6C2;"> -Os -o</span><span style="color: #98C379;"> output.wasm input.wasm</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;"># Optimize aggressively for size.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm-opt</span><span style="color: #56B6C2;"> -Oz -o</span><span style="color: #98C379;"> output.wasm input.wasm</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;"># Optimize for speed.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm-opt</span><span style="color: #56B6C2;"> -O -o</span><span style="color: #98C379;"> output.wasm input.wasm</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;"># Optimize aggressively for speed.</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm-opt</span><span style="color: #56B6C2;"> -O3 -o</span><span style="color: #98C379;"> output.wasm input.wasm</span></span></code></pre>
+<p>For further optimizations, we could turn our <code>Universe</code> into a static global instance, and so is its cells. Without any allocator, we could even make our lib <code>#![no_std]</code></p>
+<p>I'll leave it here, though.</p>
+<h2 id="publishing">Publishing</h2>
+<p>Publish to npm:</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #B57EDC;">wasm-pack</span><span style="color: #98C379;"> login</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm-pack</span><span style="color: #98C379;"> build</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">wasm-pack</span><span style="color: #98C379;"> publish</span></span></code></pre>
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#rust-wasm-building-conway-s-game-of-life">Rust WASM: Building Conway&#x27;s Game of Life</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#prerequisites">Prerequisites</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#game-of-life">Game of Life</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#implementation">Implementation</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#rust-part">Rust Part</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#javascript-part">JavaScript Part</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#testing">Testing</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#debugging">Debugging</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#log-for-panics">Log for Panics</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#log-error-messages-to-console">Log Error Messages to Console</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#use-a-debugger">Use a Debugger</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#interaction-between-rust-and-js">Interaction between Rust and JS</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#add-a-button">Add a Button</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#toggling-cells">Toggling Cells</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#time-profiling">Time Profiling</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#counting-fps-by-performance-now">Counting FPS by performance.now()</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#set-timer-for-universe-tick">Set Timer for Universe::tick</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#enhancing-performance">Enhancing Performance</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#shrinking-binary-size">Shrinking Binary Size</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/a-rust-wasm-practice/#publishing">Publishing</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

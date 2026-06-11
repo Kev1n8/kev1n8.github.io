@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Notes of MySQL
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Notes of MySQL" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Notes of MySQL
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2023-07-13</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/database/"
+                                       class="post-tag">database</a>
+                                
+                                    <a href="https://kaifengzheng.github.io/tags/innodb/"
+                                       class="post-tag">innodb</a>
+                                
+                                    <a href="https://kaifengzheng.github.io/tags/mysql/"
+                                       class="post-tag">mysql</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="mysql">MySQL</h1>
+<h2 id="sql">SQL</h2>
+<h3 id="ddl">DDL</h3>
+<p>数据定义语言 Data Definition Language</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="plain"><span class="giallo-l"><span>show databases;</span></span>
+<span class="giallo-l"><span>select database0;</span></span>
+<span class="giallo-l"><span>create database [if not exists] base_name [default charset] [collate];</span></span>
+<span class="giallo-l"><span>drop database [if exists] base_name;</span></span>
+<span class="giallo-l"><span>use base_name;</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>show tables;</span></span>
+<span class="giallo-l"><span>desc table_name;</span></span>
+<span class="giallo-l"><span>show create table;</span></span>
+<span class="giallo-l"><span>create table table_name(</span></span>
+<span class="giallo-l"><span>		field_1 field_type [comment cmt],</span></span>
+<span class="giallo-l"><span>  	...</span></span>
+<span class="giallo-l"><span>)[comment cmt];</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>alter table table_name modify target_field new_type(len);</span></span>
+<span class="giallo-l"><span>alter table table_name change old_field new_field new_type(len) [comment cmt] [restrain];</span></span>
+<span class="giallo-l"><span>alter table table_name drop field;</span></span>
+<span class="giallo-l"><span>alter table table_name rename to new_table_name;</span></span>
+<span class="giallo-l"><span>drop table [if exists] table_name;#删目录</span></span>
+<span class="giallo-l"><span>truncate table table_name;#删内容</span></span></code></pre><h3 id="dml">DML</h3>
+<p>数据操作语言 Data Manipulation Language</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="plain"><span class="giallo-l"><span>insert into table_name(field1,...) values(val1,...);</span></span>
+<span class="giallo-l"><span>insert into table_name values(val...);</span></span>
+<span class="giallo-l"><span>insert into table_name(field1,...) values(val1,...),...;</span></span>
+<span class="giallo-l"><span>insert into table_name values(val...),...;</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>update table_name set field1=val1,... [where condition];</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>delete from table_name [where condition];</span></span></code></pre><h3 id="dql">DQL</h3>
+<p>数据查询语言 Data Query Language</p>
+<ul>
+<li>基本查询</li>
+<li>条件查询(where)</li>
+<li>聚合查询(count, max, min, avg, sum)</li>
+<li>分组查询(group by)</li>
+<li>排序查询(order by)</li>
+<li>分页查询(limit)</li>
+</ul>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="plain"><span class="giallo-l"><span>select field1,... from table_name;</span></span>
+<span class="giallo-l"><span>select * from table_name;</span></span>
+<span class="giallo-l"><span>select field [[as] niknme],... from table_name;</span></span>
+<span class="giallo-l"><span>select distinct field from table_name;</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>select ... from table_name where condition;</span></span>
+<span class="giallo-l"><span>select ... from table_name in (val1,...);</span></span>
+<span class="giallo-l"><span>select ... from table_name between ... and ...;#[]</span></span>
+<span class="giallo-l"><span>select ... from table_name like &#39;_?&#39; or &#39;%?&#39;;</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>select ... from ... [where con] group by evidence_field [hanving con];</span></span>
+<span class="giallo-l"><span>select ... from ... order by field1 asc_desc,...;</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>select ... from ... limit start_index, following_amount;</span></span></code></pre><h3 id="dcl">DCL</h3>
+<p>数据控制语言 Data Control Language</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="plain"><span class="giallo-l"><span>use mysql;</span></span>
+<span class="giallo-l"><span>select * from user;</span></span>
+<span class="giallo-l"><span>create user &#39;username&#39;@&#39;host&#39; identified by &#39;pwd&#39;;</span></span>
+<span class="giallo-l"><span>alter user &#39;username&#39;@&#39;host&#39; identified with old_pwd by &#39;new_one&#39;;</span></span>
+<span class="giallo-l"><span>drop user &#39;username&#39;@&#39;host&#39;;</span></span>
+<span class="giallo-l"><span>#************************#</span></span>
+<span class="giallo-l"><span>show grants for &#39;username&#39;@&#39;host&#39;;</span></span>
+<span class="giallo-l"><span>grant grant_list on base.table to &#39;username&#39;@&#39;host&#39;;</span></span>
+<span class="giallo-l"><span>revoke grant_list on base.table from &#39;username&#39;@&#39;host&#39;;</span></span></code></pre><h2 id="han-shu">函数</h2>
+<p>字符串函数</p>
+<ul>
+<li>
+<p>Concat(s1,...)</p>
+</li>
+<li>
+<p>Lower(str)</p>
+</li>
+<li>
+<p>Upper(str)</p>
+</li>
+<li>
+<p>LPad(str,n,pad)</p>
+</li>
+<li>
+<p>RPad(str,n,pad)</p>
+</li>
+<li>
+<p>Trim(str)</p>
+</li>
+<li>
+<p>Substring(str, start,len)</p>
+</li>
+</ul>
+<p>数值函数</p>
+<ul>
+<li>Ceil(x)</li>
+<li>Floor(x)</li>
+<li>Mod(x,y) x/y的模</li>
+<li>Rand()</li>
+<li>Round(x,y) 四舍五入，保留y位小数</li>
+</ul>
+<p>日期函数</p>
+<ul>
+<li>Curdate()</li>
+<li>Curtime()</li>
+<li>Now()</li>
+<li>Year(date)</li>
+<li>Month(date)</li>
+<li>Day(date)</li>
+<li>Date_add(date,INTERVAL expr type)</li>
+<li>Datediff(date1,date2)</li>
+</ul>
+<p>流程函数</p>
+<ul>
+<li>if(value t, f)</li>
+<li>Ifnull(value1, value2)</li>
+<li>Case when [val1] then [res1] ... else [default] end</li>
+<li>Case [expr] then [res1] ... else [default] end</li>
+</ul>
+<h2 id="yue-shu">约束</h2>
+<ol>
+<li>非空 not null</li>
+<li>唯一 unique</li>
+<li>主键 primary key (AUTO_INCREMENT)</li>
+<li>默认 default</li>
+<li>检查 check</li>
+<li>外键 foreign key</li>
+</ol>
+<h2 id="duo-biao-cha-xun">多表查询</h2>
+<p>关系</p>
+<ol>
+<li>一对多：多的一方设置外键，关联另一方主键</li>
+<li>多对多：建立中间表，中间表包含两个外键，关联两张表主键</li>
+<li>一对一：用于表结构拆分，任意表中设置唯一外键，关联另一表主键</li>
+</ol>
+<p>查询</p>
+<ol>
+<li>
+<p>内连接</p>
+<ul>
+<li>隐式：select ... from A,B where ...</li>
+<li>显式：select ... from A inner join b on ...</li>
+</ul>
+</li>
+<li>
+<p>外连接</p>
+<ul>
+<li>左外：select ... from A left join B on ...</li>
+<li>右外：select ... from A right join B on ...</li>
+</ul>
+</li>
+<li>
+<p>自连接</p>
+<p>Select ... from A a1,A a2 where ...</p>
+</li>
+<li>
+<p>子查询</p>
+<p>标量子查询、列子查询、行子查询、表子查询</p>
+</li>
+</ol>
+<h2 id="shi-wu">事务</h2>
+<p>@@autocommit=0 手动提交事务</p>
+<p>commit 提交事务</p>
+<p>rollback 回滚</p>
+<p>事务的四大特性</p>
+<ul>
+<li>原子性 Atomicity</li>
+<li>一致性 Consistency</li>
+<li>隔离性 Isolation</li>
+<li>持久性 Durability</li>
+</ul>
+<p>事务并发存在的问题</p>
+<ol>
+<li>脏读：读另一个事务没有提交的数据</li>
+<li>不可重复读：先后读一个记录，但是数据不同（期间有其他事务提交）</li>
+<li>幻读：无法插入</li>
+</ol>
+<p>隔离级别</p>
+<ol>
+<li>Read uncommitted</li>
+<li>Read commited</li>
+<li>Repeatable Read</li>
+<li>Serializable</li>
+</ol>
+<p>Select @@transaction_isolation</p>
+<p>set [session|global] transaction isolation level {level1234}</p>
+<h2 id="suo">锁</h2>
+<h3 id="quan-ju-suo">全局锁</h3>
+<p>加锁后，整个数据库实例就处于只读状态，典型场景：全库逻辑备份</p>
+<p><code>flush tables with read lock;</code></p>
+<p><code>mysqldump -uroot -p密码 basename &gt; base.sql</code> 终端执行</p>
+<p><code>unlock tables</code></p>
+<ol>
+<li>备份期间，所有业务停摆</li>
+<li>如果在库上备份，那么在备份期间不能从库执行主库同步过来的二进制日志会导致主从延迟</li>
+</ol>
+<p>在InnoDB引擎中，可以在备份时加上参数--single-transaction来完成不加锁的一致性数据备份</p>
+<h3 id="biao-ji-suo">表级锁</h3>
+<h4 id="biao-suo">表锁</h4>
+<ul>
+<li>表共享读锁 read lock</li>
+<li>表独占写锁 write lock</li>
+</ul>
+<p><code>lock tables name read/write</code></p>
+<p><code>unlock tables </code></p>
+<p>读锁阻塞写，写锁阻塞所有操作。</p>
+<h4 id="yuan-shu-ju-suo-meta-data-lock-mdl">元数据锁 meta data lock, MDL</h4>
+<p>由系统自动控制，无需显式使用</p>
+<p>事务A，B开启，操作对象表t</p>
+<ol>
+<li>A select t</li>
+<li>B select lock_info</li>
+</ol>
+<p><img src="/images/table_lock_1.png" alt="Screenshot 2023-07-12 at 10.19.00" /></p>
+<ol start="3">
+<li>B insert bob into employee</li>
+</ol>
+<p><img src="/images/table_lock_2.png" alt="image-20230712102406447" /></p>
+<ol start="4">
+<li>A select * from employee</li>
+</ol>
+<p><img src="/images/table_lock_3.png" alt="Screenshot 2023-07-12 at 10.25.28" /></p>
+<ol start="5">
+<li>A insert id3</li>
+<li>B alter id to primary key (blocked) exclusive与其他不兼容</li>
+<li>A commit;</li>
+<li>B throws error, 'cause A insert id3, primary key cannot be add</li>
+</ol>
+<h4 id="yi-xiang-suo">意向锁</h4>
+<ul>
+<li>意向共享锁 IS <code>select ... lock in share mode</code>添加</li>
+</ul>
+<p>​		与表锁共享锁兼容（read），与表锁排他锁（write）互斥</p>
+<ul>
+<li>意向排他锁 IX <code>insert、update、delete、select ... for update</code>添加</li>
+</ul>
+<p>​		与所有表锁互斥，意向锁之间不排斥</p>
+<p>当表已经存在意向锁时试图加互斥表锁，会导致加表锁的事务线程阻塞，直到意向锁解除</p>
+<h3 id="xing-ji-suo">行级锁</h3>
+<h4 id="xing-suo-record-lock">行锁 Record Lock</h4>
+<p>锁定单行的纪录，防止其他事务update和delete</p>
+<p>共享锁 S 排他锁 X 与之前类似<img src="/images/Record_lock.png" alt="Screenshot 2023-07-12 at 10.51.57" /></p>
+<p>InnoDB使用next-key锁进行搜索和索引扫描，以防止幻读</p>
+<ol>
+<li>针对唯一索引进行检索时，对已经存在的纪录进行等值匹配时，将自动优化为行锁</li>
+<li>InnoDB的行锁是针对于索引加的锁，不通过索引条件检索数据，那么InnoDB将对所有记录加锁，此时升级为<strong>表锁</strong>。（SQL优化update）</li>
+</ol>
+<h4 id="jian-xi-suo-gaplock">间隙锁 GapLock</h4>
+<p>锁定索引记录的间隙，不包含行记录，确保间隙不变，防止其他事务insert，不同事务的间隙锁可以兼容</p>
+<p>InnoDB使用next-key锁扫描，</p>
+<ol>
+<li>索引上的等值查询（唯一索引），给不存在的纪录加锁时优化为间隙锁</li>
+</ol>
+<table><thead><tr><th style="text-align: center">id</th><th style="text-align: center">name</th><th style="text-align: center">age</th></tr></thead><tbody>
+<tr><td style="text-align: center">3</td><td style="text-align: center">PHP</td><td style="text-align: center">3</td></tr>
+<tr><td style="text-align: center">8</td><td style="text-align: center">Java</td><td style="text-align: center">4</td></tr>
+</tbody></table>
+<p>A：<code>update table set age = 10 where id = 5;</code></p>
+<p>B：<code>insert into table values(7,Python,7);</code> (blocked)<img src="/images/gap_lock.png" alt="Screenshot 2023-07-14 at 10.59.57" /></p>
+<h4 id="lin-jian-suo-next-key-lock">临键锁 Next-Key Lock</h4>
+<p>行锁和间隙锁的结合，同时锁住数据和间隙</p>
+<ol start="2">
+<li>索引上的等值查询（普通索引），遍历到最后一个值不满足查询需求时，next-key lock退化为间隙锁</li>
+<li>索引上的范围查询（唯一索引），会访问到不满足的条件的第一个值为止</li>
+</ol>
+<p>锁的范围表示，间隙锁范围左开右闭。</p>
+<h2 id="innodbyin-qing">InnoDB引擎</h2>
+<h3 id="luo-ji-cun-chu-jie-gou">逻辑存储结构</h3>
+<p><img src="/images/storing_structure.png" alt="点击查看图片来源" /></p>
+<h4 id="biao-kong-jian-ibd">表空间 ibd</h4>
+<p>一个mysql实例可以对应多个表空间，用于存储记录、索引等数据</p>
+<h4 id="duan-segment">段 segment</h4>
+<ul>
+<li>Leaf node segment 数据段</li>
+<li>Non-leaf node segment 索引段</li>
+<li>Rollback segment 回滚段</li>
+</ul>
+<p>InnoDB是索引组织表，数据段就是B+树的叶子结点，索引段为非叶子结点。段用来管理多个Extent</p>
+<h4 id="qu-extent">区 extent</h4>
+<p>表空间的单元结构，每个区大小为1M。默认下InnoDB存储引擎页大小为16K，即一个区中一共有64个连续的页</p>
+<h4 id="ye-page">页 page</h4>
+<p>InnoDB存储引擎管理磁盘的最小单元，每页大小默认16KB。为保证页的连续性，InnoDB每次从磁盘申请4-5个区</p>
+<h4 id="xing-row">行 row</h4>
+<p>InnoDB数据是按行存放的</p>
+<ul>
+<li>Trx_id 每次对某条记录进行改动时，都会把对应的事务id赋值给trx_id隐藏列。</li>
+<li>Roll_pointer 每次对某条记录进行改动时，都会把旧的版本写入到undo日志中，如何隐藏列就相当于一个指针可以用来找到该记录修改前的信息</li>
+</ul>
+<h3 id="jia-gou">架构</h3>
+<p><img src="/images/db_structure.png" alt="Screenshot 2023-07-17 at 08.56.06" /></p>
+<h4 id="nei-cun-jie-gou">内存结构</h4>
+<ul>
+<li>缓冲池 主内存的一个区域
+<ul>
+<li>单位 Page
+<ul>
+<li>free 空闲未被使用</li>
+<li>clean 被使用但没修改过</li>
+<li>dirty 数据被修改过</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>自适应哈希索引
+<ul>
+<li>用于优化对缓冲池数据的查询，InnoDB会监控对表上各索引页的查询，如果观察到hash索引可以提升速度，则建立hash索引</li>
+</ul>
+</li>
+<li>更改缓冲区
+<ul>
+<li>存储变更的数据，之后再同步到缓冲池，最后刷新到磁盘</li>
+</ul>
+</li>
+<li>日志缓冲区
+<ul>
+<li>保存要写入到磁盘中的log日志数据（redo log、undo log），默认大小16MB，日志缓冲区的日志回定期刷新到磁盘中。如果需要更新、插入或删除许多行的事务，增加日志缓冲区的大小可以节省磁盘I/O</li>
+<li>innodb_log_buffer_size 缓冲区大小</li>
+<li>innodb_flush_log_at_trx_commit 刷新到磁盘时机
+<ul>
+<li>1 日志每次事务提交时写入并刷新到磁盘</li>
+<li>0 每秒写入并刷新到磁盘一次</li>
+<li>2 日志在每次事务提交后写入并每秒刷新到磁盘一次？？？？</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="ci-pan-jie-gou">磁盘结构</h4>
+<ul>
+<li>System Tablespace
+<ul>
+<li>系统表空间，更改缓冲区的存储区域</li>
+</ul>
+</li>
+<li>File-Per-Table Tablespaces
+<ul>
+<li>独立表空间，每个表的文件表空间包含单个InnoDB表的数据和索引，并存储在文件系统上的单个数据文件中</li>
+</ul>
+</li>
+<li>General Tablespace
+<ul>
+<li>通用表空间，需要通过create tablespace创建，在创建表时，可以指定该表空间 e.g. Create tablespace xxx add datafile xxx engine = engine_name</li>
+</ul>
+</li>
+<li>Undo Tablespaces
+<ul>
+<li>撤销表空间，MySQL实例在初始化时会自动创建两个默认的undo表空间（初始大小16M），用于存储undo日志</li>
+</ul>
+</li>
+<li>Temporary Tablespaces
+<ul>
+<li>临时表空间，使用临时表空间和全局临时表空间存储用户创建的临时表</li>
+</ul>
+</li>
+<li>Doublewrite Buffer Files
+<ul>
+<li>双写缓冲区，innoDB将数据页从缓冲池刷新到磁盘前，先将数据页写入双写缓冲区文件中，便于系统异常时恢复数据</li>
+</ul>
+</li>
+<li>Redo Log
+<ul>
+<li>重做日志，用来实现事务持久性，该日志文件由两部分组成：重做日志缓冲（redo log buffer）以及重做日志文件（redo log），前者在内存中，后者在磁盘中。当事务提交之后会把所有修改信息都存到该日志中，用于刷新脏页到磁盘中、发生错误时，进行数据恢复使用</li>
+</ul>
+</li>
+</ul>
+<h4 id="hou-tai-xian-cheng">后台线程</h4>
+<ol>
+<li>
+<p>Master Thread</p>
+<p>核心后台线程，负责调度其他线程，还负责将缓冲池的数据异步刷新到磁盘中，保持数据一致性，包括脏页刷新、合并插入缓存、undo页的回收</p>
+</li>
+<li>
+<p>IO Thread</p>
+<p>在InnoDB中大量使用了AIO来处理IO请求，这样可以极大地提高数据库性能，而IO Thread主要负责这些IO请求的回调</p>
+<ul>
+<li>Read thread 4</li>
+<li>Write thread 4</li>
+<li>Log thread 1</li>
+<li>Insert buffer thread 1</li>
+</ul>
+</li>
+<li>
+<p>Purge Thread</p>
+<p>主要用于回收事务已经提交了的undo log</p>
+</li>
+<li>
+<p>Page Cleaner Thread</p>
+<p>协助Master Thread刷新脏页到磁盘的线程，可以减轻Master Thread的工作压力，减少阻塞</p>
+</li>
+</ol>
+<h4 id="shi-wu-yuan-li">事务原理</h4>
+<ul>
+<li>事务是一组操作的集合，是不可分割的工作单位，这些操作要么同时成功要么同时失败。</li>
+<li>特性ACID</li>
+</ul>
+<p>特性的实现</p>
+<p><strong>redo log和undo log</strong></p>
+<ul>
+<li>原子性</li>
+<li>一致性</li>
+<li>持久性</li>
+</ul>
+<p><strong>锁和MVCC</strong></p>
+<ul>
+<li>隔离性</li>
+</ul>
+<h5 id="redo-log">redo log</h5>
+<p>重做日志，记录事务提交时数据页的物理修改，用于实现事务的持久性。</p>
+<p>文件由两部分组成，重做日志缓冲和重做日志文件。当事务提交后，会把所有修改信息都存到该日志文件中，用于在刷新脏页到磁盘<strong>发生错误</strong>时进行数据恢复</p>
+<ul>
+<li>WAL write-ahead logging</li>
+</ul>
+<h5 id="undo-log">undo log</h5>
+<p>回滚日志，记录数据被修改前的信息，作用包括提供回滚和MVCC</p>
+<p>undo log不同于redo log，属于逻辑日志，其中记录的是实际操作的反向操作，如delete操作会使文件中增加insert记录。</p>
+<ul>
+<li>undo log销毁：事务执行时产生，事务提交时不会立即删除undo log，因为这些日志可能还用于MVCC</li>
+<li>undo log存储：undo log采用段的方式进行管理和记录，存放在rollback segment回滚段中，内部包含1024个undo log segment</li>
+</ul>
+<h5 id="mvcc">MVCC</h5>
+<p>Multi-Version Concurrency Control</p>
+<ul>
+<li>
+<p>当前读</p>
+<p>读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对当前读取的记录进行加锁。select...lock in share mode, selcet... for update, update, insert, delete都是当前读</p>
+</li>
+<li>
+<p>快照读</p>
+<p>简单的select（不加锁）就是快照读，读到的是数据的历史版本，有可能是历史数据，不加锁是非阻塞读</p>
+<ul>
+<li>Read Committed 每次select都生成一个快照读</li>
+<li>Repeatable Read 开启事务后第一个select语句才是快照读的地方</li>
+<li>Serializable 快照读退化为当前读</li>
+</ul>
+</li>
+<li>
+<p>MVCC——多版本并发控制，指维护一个数据的多个版本，使得读写操作没有冲突，快照读为MySQL实现MVCC提供了一个非阻塞读功能。MVCC具体实现依赖数据库记录中的<strong>三个隐式字段</strong>、<strong>undo log</strong>、<strong>realView</strong></p>
+</li>
+</ul>
+<h6 id="yin-cang-zi-duan">隐藏字段</h6>
+<ol>
+<li>
+<p>DB_TRX_ID</p>
+<p>最近修改事务ID，记录插入这条记录或最后一次修改改记录的事务ID</p>
+</li>
+<li>
+<p>DB_ROLL_PTR</p>
+<p>回滚指针，指向这条记录的上一个版本，用于配合undo log指向上一版本</p>
+</li>
+<li>
+<p>DB_ROW_ID</p>
+<p>隐式主键，表结构本身没有主键会生成</p>
+</li>
+</ol>
+<h6 id="undo-log-1">undo log</h6>
+<p>回滚日志，当insert的时候，产生的undo log只在回滚时需要，事务提交后可被立即删除；而update、delete时，产生的undo log不仅在回滚时需要，在快照读时也需要，不会被立即删除。</p>
+<ul>
+<li>
+<p>undo log版本链</p>
+<p><img src="/images/undolog_chain.png" alt="Screenshot 2023-07-13 at 11.08.59" /></p>
+</li>
+</ul>
+<h6 id="readview">readview</h6>
+<p>readview（读视图）是快照读执行时MVCC提取数据的依据，记录并维护系统当前活跃的事务（未提交）的id</p>
+<p>readview包含四个核心字段：</p>
+<ul>
+<li>m_ids 当前活跃事务id集合</li>
+<li>min_trx_id 最小活跃事务ID</li>
+<li>max_trx_id 预分配事务ID，即当前最大事务ID+1</li>
+<li>creator_trx_id readview创建者的事务ID</li>
+</ul>
+<p>版本链数据访问规则：trx_id代表当前版本事务ID</p>
+<ol>
+<li>trx_id == creator_trx_id 可以访问 （说明数据是当前事务更改的</li>
+<li>trx_id &lt; min_trx_id 可以访问 （说明数据已经提交了</li>
+<li>trx_id &gt; max_trx_id 不可以访问 （说明事务是在readview生成后才开启</li>
+<li>min_trx_id &lt;= trx_id &lt;= max_trx_id 若trx_id不在m_ids中是可以访问的 （说明数据已经提交</li>
+</ol>
+<p>不同的隔离级别，生成readview的时机不同：</p>
+<ul>
+<li>Read Committed 在事务中每次执行快照读时生成readview</li>
+<li>Repeatable Read 仅在事务中第一次执行快照读时生成readview，后续复用该readview</li>
+</ul>
+<p>结合<strong>undo log</strong>例子和<strong>readview</strong>规则理解</p>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/mysql-database/#mysql">MySQL</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#sql">SQL</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#ddl">DDL</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#dml">DML</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#dql">DQL</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#dcl">DCL</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#han-shu">函数</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#yue-shu">约束</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#duo-biao-cha-xun">多表查询</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#shi-wu">事务</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#suo">锁</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#quan-ju-suo">全局锁</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#biao-ji-suo">表级锁</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#xing-ji-suo">行级锁</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/mysql-database/#innodbyin-qing">InnoDB引擎</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#luo-ji-cun-chu-jie-gou">逻辑存储结构</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/mysql-database/#jia-gou">架构</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

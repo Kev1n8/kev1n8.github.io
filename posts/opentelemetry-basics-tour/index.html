@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                OpenTelemetry Basics Tour
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="OpenTelemetry Basics Tour" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            OpenTelemetry Basics Tour
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2025-04-01</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/observability/"
+                                       class="post-tag">observability</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h1 id="opentelemetry-basics-tour">OpenTelemetry Basics Tour</h1>
+<h2 id="intro">Intro</h2>
+<p>OpenTelemetry is an observability framework and toolkit to <strong>create</strong> and <strong>manage</strong> telemetry data like <strong>traces</strong>, <strong>metrics</strong>, and <strong>logs</strong>.</p>
+<h3 id="concepts">Concepts</h3>
+<h4 id="traces">Traces</h4>
+<p>Composed of spans in a tree structure. A trace represents the end-to-end journey of a request, while a span represents a single operation within that journey.</p>
+<p><code>TracerProvider</code> is a factory for <code>Tracer</code>s. A <code>Tracer</code> creates spans with information about what is happening for a given operation.
+<code>Trace Exporter</code> sends traces to a consumer, which can be standard output, the OpenTelemetry Collector, or any open source or vendor backend.</p>
+<h5 id="spans">Spans</h5>
+<p>Fields contained:</p>
+<ul>
+<li>Name</li>
+<li>Parent span ID (empty for root spans)</li>
+<li>Start and End Timestamps</li>
+<li>Span Context</li>
+<li>Attributes — info in KV pairs</li>
+<li>Span Events — things happening at a point in time, whose timestamp is meaningful</li>
+<li>Span Links — indicate causal relationships between spans in distributed situations</li>
+<li>Span Status — indicates whether the tracked operation completed with or without error (<code>Unset</code>, <code>Error</code>), or was explicitly set to <code>Ok</code></li>
+</ul>
+<p>Kind:</p>
+<ul>
+<li>Client — remote call such as an outgoing HTTP request or DB call</li>
+<li>Server — incoming remote call such as an incoming HTTP request or RPC</li>
+<li>Internal — operations that do not cross a process boundary, such as instrumenting a function call</li>
+<li>Producer — represents the creation of a job</li>
+<li>Consumer — represents the processing of a job, after the Producer span has already ended</li>
+</ul>
+<h4 id="metrics">Metrics</h4>
+<p>A <strong>metric</strong> is a measurement of a service captured at runtime. The moment of capturing a measurement is known as a <strong>metric event</strong>.</p>
+<p>Application and request metrics are important indicators of availability and performance.</p>
+<p>A <code>MeterProvider</code> is a factory for <code>Meter</code>s. A <code>Meter</code> creates metric instruments, capturing measurements about a service at runtime. <code>Metric Exporter</code>s send metric data to a consumer (similarly to <code>Trace Exporter</code>).</p>
+<h5 id="metric-instruments">Metric Instruments</h5>
+<p>Fields:</p>
+<ul>
+<li>Name</li>
+<li>Kind</li>
+<li>Unit (optional)</li>
+<li>Description (optional)</li>
+</ul>
+<p>Name, unit, and description are chosen by the developer or defined via <strong>semantic conventions</strong> for common ones like request and process metrics.</p>
+<p>Kind enums:</p>
+<ul>
+<li>Counter — a value accumulating over time</li>
+<li>Asynchronous Counter — same, but is collected <strong>once</strong> for the export</li>
+<li>UpDownCounter — counter that can go down</li>
+<li>Asynchronous UpDownCounter</li>
+<li>Gauge</li>
+<li>Histogram</li>
+</ul>
+<h5 id="aggregation">Aggregation</h5>
+<p>Exact or estimated statistics about metric events during a time window.</p>
+<p>e.g.</p>
+<ul>
+<li>Total bytes read by a service, per protocol type</li>
+<li>Total bytes read and bytes per request</li>
+<li>Duration of a system call</li>
+<li>Request sizes for trend prediction</li>
+<li>CPU or memory usage of a process</li>
+</ul>
+<h4 id="logs">Logs</h4>
+<p>A log is a timestamped text record.</p>
+<p>Log Appender/Bridge emits logs into an OpenTelemetry <code>LogRecordExporter</code>.</p>
+<p><code>LoggerProvider</code> is a factory for <code>Logger</code>s. A <code>Logger</code> creates log records. <code>LogRecordExporter</code>s send log records to a consumer.</p>
+<p>Fields:</p>
+<ul>
+<li>Timestamp — Time when the event occurred</li>
+<li>ObservedTimestamp — Time when the event was observed</li>
+<li>TraceId — Request trace ID</li>
+<li>SpanId — Request span ID</li>
+<li>TraceFlags — W3C trace flag</li>
+<li>SeverityText — The severity text (also known as log level)</li>
+<li>SeverityNumber — Numerical value of the severity</li>
+<li>Body — The body of the log record</li>
+<li>Resource — Describes the source of the log</li>
+<li>InstrumentationScope — Describes the scope that emitted the log</li>
+<li>Attributes — Additional information about the event</li>
+</ul>
+<h3 id="major-components">Major Components</h3>
+<ul>
+<li>A specification for all components</li>
+<li>A standard protocol that defines the shape of telemetry data</li>
+<li>Semantic conventions that define a standard naming scheme for common telemetry data types</li>
+<li>APIs that define how to generate telemetry data</li>
+<li>Language SDKs that implement the specification, APIs, and export of telemetry data</li>
+<li>A library ecosystem that implements instrumentation for common libraries and frameworks</li>
+<li>Automatic instrumentation components that generate telemetry data without requiring code changes</li>
+<li>The OpenTelemetry Collector, a proxy that receives, processes, and exports telemetry data</li>
+<li>Other tools</li>
+</ul>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/opentelemetry-basics-tour/#opentelemetry-basics-tour">OpenTelemetry Basics Tour</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/opentelemetry-basics-tour/#intro">Intro</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/opentelemetry-basics-tour/#concepts">Concepts</a>
+                                        </li>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/opentelemetry-basics-tour/#major-components">Major Components</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

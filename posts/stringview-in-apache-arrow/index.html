@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                StringView in Apache Arrow &amp; a DataFusion SUBSTR Optimization
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="StringView in Apache Arrow &amp; a DataFusion SUBSTR Optimization" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            StringView in Apache Arrow &amp; a DataFusion SUBSTR Optimization
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2024-09-09</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/rust/"
+                                       class="post-tag">rust</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <p>Apache Arrow是一个高效的列式数据的内存表示，本文所指Arrow是arrow-rs，也就是Arrow的Rust实现，本文介绍其<code>StringViewArray</code>与<code>StringArray</code>的不同，这也是Rust版本才有的特性。</p>
+<h2 id="stringarrayjian-jie">StringArray简介</h2>
+<p><code>StringArray</code>是arrow的一种基本列实例、是一列字符串数据，一个<code>StringArray</code>主要有</p>
+<ul>
+<li>一个<code>nullmap</code>，指示某一行是否为null</li>
+<li>一个<code>offset</code>数组，指示某一行的字符串在Buffer上的位移</li>
+<li>一个Buffer用来存储实际的UTF8字符串数据</li>
+</ul>
+<h2 id="yi-ge-stringviewchang-shen-me-yang">一个StringView长什么样？</h2>
+<p><code>StringViewArray</code>中同样也有<code>nullmap</code>，但是却不使用简单的<code>offset</code>，而是用一个<code>StringView</code>来指示字符串。首先，一个<code>StringView</code>的大小为16字节，前4个字节用来表示字符串长度。剩余的12字节分两种情况，</p>
+<ol>
+<li>字符串编码字节数小于12时，该字符串直接内联到存放在剩余的12字节内</li>
+<li>字节数大于12时，存放buffer编号、偏移和前缀，各占用4字节。其中，buffer编号即完整字符串数据所存放的，属于该<code>StringViewArray</code>的buffer的编号；偏移即在该buffer中第几个字节开始为该字符串数据；前缀存放了字符串前4个字节的编码数据。</li>
+</ol>
+<p><img src="/images/Stringview.png" alt="Stringview" />{:height="360px" width="auto"}</p>
+<h2 id="stringarray-vs-stringviewarray">StringArray vs StringViewArray</h2>
+<p>好处显而易见，如果一个Array中的字符串有大量重复，那么<code>StringView</code>就可以简单指向Buffer中的同一段数据，大大减少内存用量。如下面的示例，对于一个Array：</p>
+<p>"Apache StringView"</p>
+<p>"Apache DataFusion"</p>
+<p>"Apache StringView"</p>
+<p>"InfluxDB"</p>
+<p><code>StringViewArray</code>能够重复利用此前出现过的字符串，相比<code>StringArray</code>，Buffer减少了17字节（另外这里可以看出在数据量小的情况，因为<code>StringView</code>占用的内存大于一般的<code>OffsetSize</code>，如<code>i32, i64</code>，<code>StringView</code>的好处较难体现）</p>
+<p><img src="/images/StringViewDesign.png" alt="StringViewDesign" />{:height="230px" width="auto"}</p>
+<h2 id="stringviewarrayru-he-gou-jian">StringViewArray如何构建</h2>
+<p>arrow提供了<code>StringViewArrayBuilder</code>来构建一个Array，而关键函数就是<code>append_value(&amp;mut self, value: impl AsRef&lt;T::Native&gt;)</code>。</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> append_value</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>,</span><span style="color: #C6CCD7;"> value</span><span style="color: #E06C75;">: impl</span><span style="color: #E5C07B;"> AsRef</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Native</span><span>&gt;) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;">: &amp;</span><span>[</span><span style="color: #E5C07B;">u8</span><span>]</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> value</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_ref</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_ref</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> length</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">try_into</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if</span><span style="color: #C6CCD7;"> length</span><span style="color: #E06C75;"> &lt;=</span><span style="color: #56B6C2;"> 12</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let mut</span><span style="color: #C6CCD7;"> view_buffer</span><span style="color: #E06C75;"> =</span><span> [</span><span style="color: #56B6C2;">0</span><span>;</span><span style="color: #56B6C2;"> 16</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            view_buffer</span><span>[</span><span style="color: #56B6C2;">0</span><span style="color: #E06C75;">..</span><span style="color: #56B6C2;">4</span><span>]</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">copy_from_slice</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">length</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">to_le_bytes</span><span>());</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            view_buffer</span><span>[</span><span style="color: #56B6C2;">4</span><span style="color: #E06C75;">..</span><span style="color: #56B6C2;">4</span><span style="color: #E06C75;"> +</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>()]</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">copy_from_slice</span><span>(</span><span style="color: #C6CCD7;">v</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>views_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">append</span><span>(</span><span style="color: #61AFEF;">u128</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from_le_bytes</span><span>(</span><span style="color: #C6CCD7;">view_buffer</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>null_buffer_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">append_non_null</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            return</span><span>;</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">        // Deduplication if:</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">        // (1) deduplication is enabled.</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">        // (2) len &gt; 12</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if</span><span style="color: #61AFEF;"> let</span><span style="color: #E5C07B;"> Some</span><span>((</span><span style="color: #61AFEF;">mut</span><span style="color: #C6CCD7;"> ht</span><span>,</span><span style="color: #C6CCD7;"> hasher</span><span>))</span><span style="color: #E06C75;"> = self.</span><span>string_tracker</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">take</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> hash_val</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> hasher</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">hash_one</span><span>(</span><span style="color: #C6CCD7;">v</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> hasher_fn</span><span style="color: #E06C75;"> = |</span><span style="color: #C6CCD7;">v</span><span style="color: #E06C75;">: &amp;</span><span style="color: #C6CCD7;">_</span><span style="color: #E06C75;">|</span><span style="color: #C6CCD7;"> hasher</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">hash_one</span><span>(</span><span style="color: #C6CCD7;">v</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> entry</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> ht</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">entry</span><span>(</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                hash_val</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                |</span><span style="color: #C6CCD7;">idx</span><span style="color: #E06C75;">|</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> stored_value</span><span style="color: #E06C75;"> = self.</span><span style="color: #B57EDC;">get_value</span><span>(</span><span style="color: #E06C75;">*</span><span style="color: #C6CCD7;">idx</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                    v</span><span style="color: #E06C75;"> ==</span><span style="color: #C6CCD7;"> stored_value</span></span>
+<span class="giallo-l"><span>                },</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                hasher_fn</span><span>,</span></span>
+<span class="giallo-l"><span>            );</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            match</span><span style="color: #C6CCD7;"> entry</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                Entry</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">Occupied</span><span>(</span><span style="color: #C6CCD7;">occupied</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // If the string already exists, we will directly use the view</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                    let</span><span style="color: #C6CCD7;"> idx</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> occupied</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">get</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    self.</span><span>views_builder</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                        .</span><span style="color: #B57EDC;">append</span><span>(</span><span style="color: #E06C75;">self.</span><span>views_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_slice</span><span>()[</span><span style="color: #E06C75;">*</span><span style="color: #C6CCD7;">idx</span><span>]);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    self.</span><span>null_buffer_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">append_non_null</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    self.</span><span>string_tracker </span><span style="color: #E06C75;">=</span><span style="color: #E5C07B;"> Some</span><span>((</span><span style="color: #C6CCD7;">ht</span><span>,</span><span style="color: #C6CCD7;"> hasher</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                    return</span><span>;</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">                Entry</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">Vacant</span><span>(</span><span style="color: #C6CCD7;">vacant</span><span>)</span><span style="color: #E06C75;"> =&gt;</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // o.w. we insert the (string hash -&gt; view index)</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">                    // the idx is current length of views_builder, as we are inserting a new view</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">                    vacant</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">insert</span><span>(</span><span style="color: #E06C75;">self.</span><span>views_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>());</span></span>
+<span class="giallo-l"><span>                }</span></span>
+<span class="giallo-l"><span>            }</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>string_tracker </span><span style="color: #E06C75;">=</span><span style="color: #E5C07B;"> Some</span><span>((</span><span style="color: #C6CCD7;">ht</span><span>,</span><span style="color: #C6CCD7;"> hasher</span><span>));</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> required_cap</span><span style="color: #E06C75;"> = self.</span><span>in_progress</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>()</span><span style="color: #E06C75;"> +</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if self.</span><span>in_progress</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">capacity</span><span>() &lt;</span><span style="color: #C6CCD7;"> required_cap</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span style="color: #B57EDC;">flush_in_progress</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> to_reserve</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">max</span><span>(</span><span style="color: #E06C75;">self.</span><span>block_size</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">next_size</span><span>()</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> usize</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>in_progress</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">reserve</span><span>(</span><span style="color: #C6CCD7;">to_reserve</span><span>);</span></span>
+<span class="giallo-l"><span>        };</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> offset</span><span style="color: #E06C75;"> = self.</span><span>in_progress</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>()</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> u32</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>in_progress</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">extend_from_slice</span><span>(</span><span style="color: #C6CCD7;">v</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> view</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> ByteView</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            length</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            prefix</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from_le_bytes</span><span>(</span><span style="color: #C6CCD7;">v</span><span>[</span><span style="color: #56B6C2;">0</span><span style="color: #E06C75;">..</span><span style="color: #56B6C2;">4</span><span>]</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">try_into</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>()),</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            buffer_index</span><span style="color: #E06C75;">: self.</span><span>completed</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>()</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> u32</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            offset</span><span>,</span></span>
+<span class="giallo-l"><span>        };</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>views_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">append</span><span>(</span><span style="color: #C6CCD7;">view</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">into</span><span>());</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>null_buffer_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">append_non_null</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span></span></code></pre>
+<p>大致逻辑如下：</p>
+<ol>
+<li>检查value大小，如果小于12，直接内联并制作一个view，使用成员<code>views_builder</code>加入views中</li>
+<li>若大于12，则会使用哈希方法检查是否在buffer中已有该字符串，如有则直接根据所在位置制作一个view并添加</li>
+<li>若不存在这个字符串，就会尝试添加进buffer，此处如果buffer达到指定大小，则会保存起来作为只读“历史buffer”，以便GC。</li>
+</ol>
+<p>当然，这是从零构建一个<code>StringViewArray</code>的方法，我们还可以直接通过<code>generic_view_array::new_unchecked</code>方法来不安全地直接构造一个Array，具体见下文。</p>
+<h2 id="shi-yong-stringviewyou-hua-substrhan-shu">使用StringView优化SUBSTR函数</h2>
+<p><code>substr(str, start, [count])</code>可以帮助我们获得字符串的指定字串，因为<code>substr</code>的结果一定是原字符串的子集，那么如果输入的<code>DataType</code>是<code>StringViewArray</code>的话，我们就可以这样操作：</p>
+<ol>
+<li>直接将原本的所有buffer拷贝作为新Array的buffer，</li>
+<li>然后直接操作每个<code>StringView</code>， 只需要根据通过计算得到的<code>sub_string</code>的index构建view并载入<code>views_buffer</code>中</li>
+</ol>
+<p>这样做的好处是：</p>
+<ul>
+<li>使用<code>StringViewArray</code>带来了节约内存的好处</li>
+<li>直接复制所有buffer相比通过此前<code>generic_array_builder</code>一次次调用<code>append_value</code>更高效。虽然buffer可能暂时会有无用的部份，但是GC可以后续把无用的部份回收掉。</li>
+</ul>
+<p>下面列举一个示例函数用于手动收集view和构造<code>nullmap</code>以便在<code>new_unchecked</code>中使用：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #5F6672;font-style: italic;">/// Make a `u128` based on the given substr, start(offset to view.offset), and</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">/// push into to the given buffers</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> make_and_append_view</span><span>(</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    views_buffer</span><span style="color: #E06C75;">: &amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E5C07B;"> Vec</span><span>&lt;</span><span style="color: #E5C07B;">u128</span><span>&gt;,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    null_builder</span><span style="color: #E06C75;">: &amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E5C07B;"> NullBufferBuilder</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    raw</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">u128</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    substr</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    start</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>,</span></span>
+<span class="giallo-l"><span>) {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> substr_len</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> substr</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> sub_view</span><span style="color: #E06C75;"> = if</span><span style="color: #C6CCD7;"> substr_len</span><span style="color: #E06C75;"> &gt;</span><span style="color: #56B6C2;"> 12</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> view</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> ByteView</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(</span><span style="color: #E06C75;">*</span><span style="color: #C6CCD7;">raw</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        make_view</span><span>(</span><span style="color: #C6CCD7;">substr</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_bytes</span><span>(),</span><span style="color: #C6CCD7;"> view</span><span style="color: #E06C75;">.</span><span>buffer_index,</span><span style="color: #C6CCD7;"> view</span><span style="color: #E06C75;">.</span><span>offset </span><span style="color: #E06C75;">+</span><span style="color: #C6CCD7;"> start</span><span>)</span></span>
+<span class="giallo-l"><span>    }</span><span style="color: #E06C75;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">        // inline value does not need block id or offset</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        make_view</span><span>(</span><span style="color: #C6CCD7;">substr</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_bytes</span><span>(),</span><span style="color: #56B6C2;"> 0</span><span>,</span><span style="color: #56B6C2;"> 0</span><span>)</span></span>
+<span class="giallo-l"><span>    };</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    views_buffer</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">push</span><span>(</span><span style="color: #C6CCD7;">sub_view</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    null_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">append_non_null</span><span>();</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// Somewhere else:</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">...</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">	let</span><span style="color: #C6CCD7;"> views_buf</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> ScalarBuffer</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(</span><span style="color: #C6CCD7;">views_buf</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> nulls_buf</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> null_builder</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">finish</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // Safety:</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // (1) The blocks of the given views are all provided</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // (2) Each of the range `view.offset+start..end` of view in views_buf is within</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // the bounds of each of the blocks</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    unsafe</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> array</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> StringViewArray</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new_unchecked</span><span>(</span><span style="color: #5F6672;font-style: italic;">  // 在这里直接构造一个StringViewArray</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            views_buf</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            string_view_array</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">data_buffers</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">to_vec</span><span>(),</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            nulls_buf</span><span>,</span></span>
+<span class="giallo-l"><span>        );</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">        Ok</span><span>(</span><span style="color: #E5C07B;">Arc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #C6CCD7;">array</span><span>)</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> ArrayRef</span><span>)</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">...</span></span></code></pre>
+<p>完整的优化代码可以参考<a rel="external" href="https://github.com/apache/datafusion/pull/12044">这里</a>。</p>
+
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/stringview-in-apache-arrow/#stringarrayjian-jie">StringArray简介</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/stringview-in-apache-arrow/#yi-ge-stringviewchang-shen-me-yang">一个StringView长什么样？</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/stringview-in-apache-arrow/#stringarray-vs-stringviewarray">StringArray vs StringViewArray</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/stringview-in-apache-arrow/#stringviewarrayru-he-gou-jian">StringViewArray如何构建</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/stringview-in-apache-arrow/#shi-yong-stringviewyou-hua-substrhan-shu">使用StringView优化SUBSTR函数</a>
+
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>

@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en" class="dark light">
+
+    <head>
+    
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="base" content="https:&#x2F;&#x2F;kaifengzheng.github.io" />
+
+    
+
+    
+
+    
+    
+    
+        <title>
+            
+                Notes of Rust
+            
+        </title>
+
+        
+            <meta property="og:title"
+                  content="Notes of Rust" />
+        
+    
+
+    
+        
+            <meta property="og:description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+        
+            <meta name="description" content="Some notes on Rust, distributed systems, databases, and more." />
+        
+    
+
+    
+    
+        <link rel="icon"
+              type="image/png"
+              href="https://kaifengzheng.github.io/icon/favicon.png" />
+    
+
+    
+    
+        <link href=https://kaifengzheng.github.io/fonts.css rel="stylesheet" />
+    
+
+    
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/codeblock.js></script>
+    
+
+    
+    
+        <script defer src=https://kaifengzheng.github.io/js/toc.js></script>
+    
+
+    
+    
+
+    
+
+    
+    
+        
+            
+                <link rel="alternate"
+                      type="application/atom+xml"
+                      title="
+    Kaifeng Zheng
+"
+                      href="https://kaifengzheng.github.io/atom.xml" />
+            
+        
+    
+
+
+    
+
+    
+    
+
+    
+    
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/light.css" />
+        <link id="darkModeStyle"
+              rel="stylesheet"
+              type="text/css"
+              href="https://kaifengzheng.github.io/theme/dark.css" />
+    
+
+    
+        
+            <script>
+                var themeToggleMode = "toggle-auto";
+            </script>
+        
+        <script src=https://kaifengzheng.github.io/js/themetoggle.js></script>
+
+        
+            <script>
+                setTheme(getSavedTheme());
+            </script>
+        
+    
+
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="https://kaifengzheng.github.io/main.css" />
+
+    
+
+    
+</head>
+
+
+    <body>
+        
+        <div class="left-content">
+            
+            
+        </div>
+
+        <div class="content">
+            <nav>
+    <div class="left-nav">
+        
+            <a href=https:&#x2F;&#x2F;kaifengzheng.github.io>Kaifeng Zheng</a>
+        
+
+
+        <div class="socials">
+            
+                
+            
+            
+                <a rel='me' href="https:&#x2F;&#x2F;github.com&#x2F;Kev1n8" class="social">
+                    <img alt="github"
+                         src="https://kaifengzheng.github.io/icons/social/github.svg" />
+                </a>
+            
+        </div>
+    </div>
+
+    <div class="right-nav">
+        
+            <a href=https://kaifengzheng.github.io/posts style="margin-right: 0.5em">&#x2F;posts</a>
+        
+            <a href=https://kaifengzheng.github.io/about style="margin-right: 0.5em">&#x2F;about</a>
+        
+            <a href=https://kaifengzheng.github.io/tags style="margin-right: 0.5em">&#x2F;tags</a>
+        
+
+        
+
+        
+        
+            <a id="dark-mode-toggle"
+               onclick="toggleTheme(); event.preventDefault();"
+               href="#">
+                <img src="https://kaifengzheng.github.io/icons/sun.svg" id="sun-icon" alt="Light" />
+                <img src="https://kaifengzheng.github.io/icons/moon.svg"
+                     id="moon-icon"
+                     style="filter: invert(1)"
+                     alt="Dark" />
+                
+                    <img src="https://kaifengzheng.github.io/icons/auto.svg"
+                         id="auto-icon"
+                         style="filter: invert(1)"
+                         alt="Auto" />
+                
+            </a>
+
+            <!-- Initialize the theme toggle icons -->
+            <script>
+                updateItemToggleTheme()
+            </script>
+        
+    </div>
+</nav>
+
+
+            
+            
+    
+    <div class="visible-element-observer-root" data-selector="main article p">
+        <main>
+            <article>
+                <div class="title">
+                    
+                    
+    
+        <div class="page-header">
+            Notes of Rust
+        </div>
+    
+
+
+                    <div class="meta">
+                        
+                            Posted on <time>2023-04-24</time>
+                        
+
+
+                        
+
+                        
+
+                        
+
+                        
+                        
+
+                        
+                        
+
+                        
+                        
+                            <span class="tags-label">::</span>
+                            <span class="tags">
+                                    <a href="https://kaifengzheng.github.io/tags/rust/"
+                                       class="post-tag">rust</a>
+                                
+                            </span>
+                        
+
+                        
+
+                    </div>
+                </div>
+
+                
+
+                <section class="body">
+                    <h2 id="ke-bian-he-bu-ke-bian-bian-liang">可变和不可变变量</h2>
+<p><code>let mut, let </code></p>
+<p><code>const</code> 与 <code>let</code>无<code>mut</code>区别在于，<code>let</code>有<code>ownership</code>，而<code>const</code>随便使用</p>
+<h2 id="shu-ju-lei-xing">数据类型</h2>
+<h3 id="scalar"><code>Scalar</code></h3>
+<p><code>integer, float, boolean, character</code></p>
+<h3 id="compound"><code>Compound</code></h3>
+<p><code>tuple., array[]</code></p>
+<h2 id="han-shu">函数</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> func_name</span><span>(</span><span style="color: #C6CCD7;">para</span><span style="color: #E06C75;">:</span><span style="color: #61AFEF;">type</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #C6CCD7;"> return_type</span><span>{}</span></span></code></pre><h2 id="zhu-shi">注释</h2>
+<h2 id="kong-zhi-liu">控制流</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">if</span><span>,</span><span style="color: #E06C75;">else if</span><span>,</span><span style="color: #E06C75;">else</span><span>,</span><span style="color: #E06C75;">loop</span><span>,</span><span style="color: #E06C75;">break</span><span>,</span><span style="color: #E06C75;">while</span><span>,</span><span style="color: #E06C75;">for</span><span>,</span><span style="color: #E06C75;">..</span><span>(</span><span style="color: #E06C75;">=</span><span>)</span></span></code></pre><h2 id="suo-you-quan">所有权</h2>
+<p>会转让或释放所有权的情况（储存堆上的变量）：
+=移动、函数传参数、所在域结束
+禁止发生的情况：
+在当前域有两个只向同一变量的可变引用、
+在当前域内同时有可变引用和不可变引用并且在可变引用后再次使用了之前的不可变引用、
+代码块返回一个生命已经终结的引用、
+可变引用会触发<code>borrowing</code>，引用指向的变量失去改变自己的权利，在引用死亡前禁止变量改变自己、
+引用指向变量生命必须比引用本身长</p>
+<h2 id="jie-gou">结构</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #E5C07B;"> Struct_name</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    data_name</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;">type_name</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Struct_name</span><span>{</span><span style="color: #5F6672;font-style: italic;">//赋值};</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Struct_name</span><span>{</span><span style="color: #E06C75;">..</span><span style="color: #C6CCD7;">struct1</span><span>};</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> build_struct</span><span>(</span><span style="color: #C6CCD7;">name</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;">type_name</span><span>)</span><span style="color: #E06C75;">-&gt;</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    name</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//note that all operation above takes the</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//ownership from the parameters</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #E5C07B;"> Point</span><span>(</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;">i32</span><span>);</span></span></code></pre>
+<p>实现结构内的方法：<code>impl,self</code></p>
+<h2 id="mei-ju">枚举</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> Kind</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    k1</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    k2</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>访问方式::</p>
+<p><code>varient</code>可以附带有数据类型<code>()</code>互相可以不一样。</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> Message</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Quit</span><span>,</span><span style="color: #5F6672;font-style: italic;">//no data associated</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Move</span><span>{</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #C6CCD7;">y</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">i32</span><span>},</span><span style="color: #5F6672;font-style: italic;">//has a name fields, like a struct</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    Write</span><span>(</span><span style="color: #E5C07B;">String</span><span>),</span><span style="color: #5F6672;font-style: italic;">// has a String</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    ChangeColor</span><span>(</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;">i32</span><span>),</span><span style="color: #5F6672;font-style: italic;">// includes 3 value, like a tuple</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">match</span><span style="color: #C6CCD7;"> enum_type</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    ::</span><span style="color: #C6CCD7;">case</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #C6CCD7;"> return_value</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    _</span><span style="color: #E06C75;"> =&gt;</span><span style="color: #C6CCD7;"> return_else_value</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">if</span><span style="color: #61AFEF;"> let</span><span style="color: #5F6672;font-style: italic;"> //for sequence only contains 2 branches</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">if</span><span style="color: #61AFEF;"> let</span><span style="color: #E5C07B;"> Some</span><span>(</span><span style="color: #C6CCD7;">num</span><span>)</span><span style="color: #E06C75;"> =</span><span> num_type_is_Option{</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;{</span><span style="color: #98C379;">num</span><span>}&quot;);</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">else</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">not a num</span><span>&quot;);</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//match 必须包含所有branches</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//Rust 内置Option枚举</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> Option</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;{</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Some</span><span>(</span><span style="color: #E5C07B;">T</span><span>),</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    None</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="packages-crates-and-modules">Packages, Crates and Modules</h2>
+<p>调用<code>cargo new</code>会创建一个新项目，就是一个<code>Package</code></p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E5C07B;">Cargo</span><span style="color: #E06C75;">.</span><span>toml</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">src</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    main</span><span style="color: #E06C75;">.</span><span>rs</span></span></code></pre>
+<p><code>Crate</code>有两种类型：<code>bin</code>和<code>lib</code></p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #C6CCD7;">src</span><span style="color: #E06C75;">/</span><span style="color: #C6CCD7;">main</span><span style="color: #E06C75;">.</span><span>rs </span><span style="color: #5F6672;font-style: italic;">//bin类型的Crate</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">src</span><span style="color: #E06C75;">/</span><span style="color: #C6CCD7;">lib</span><span style="color: #E06C75;">.</span><span>rs </span><span style="color: #5F6672;font-style: italic;">//lib类型的Crate</span></span>
+<span class="giallo-l"><span>一个package中的Crate可以有多个bin类型，最多只能有一个lib类型，</span></span>
+<span class="giallo-l"><span>当有多个bin，需要放到src</span><span style="color: #E06C75;">/</span><span>bin下。</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>bin类型use的path不能使用crate开头，必须是Crate本名。</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">re</span><span style="color: #E06C75;">-</span><span style="color: #C6CCD7;">exporting</span><span>： 利用pub修饰use，让导入当前scope的第三者可以引用当前scope已经use的item</span></span></code></pre>
+<p><code>module:</code>在Crate内组织代码</p>
+<h2 id="chang-yong-de-collections">常用的<code>Collections</code></h2>
+<h3 id="vectors"><code>vectors</code></h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> vec!</span><span>[</span><span style="color: #56B6C2;">1</span><span>,</span><span style="color: #56B6C2;">2</span><span>,</span><span style="color: #56B6C2;">3</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//let v: Vec&lt;i32&gt; = Vec::new();</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">v</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">push</span><span>(</span><span style="color: #56B6C2;">4</span><span>);</span><span style="color: #5F6672;font-style: italic;">//mutable reference</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">v</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">get</span><span>(</span><span style="color: #56B6C2;">2</span><span>);</span><span style="color: #5F6672;font-style: italic;">//return an Option</span></span></code></pre><h3 id="string-and-utf-8"><code>String and UTF-8</code></h3>
+<p>use chars() or bytes() to visit item in side string</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #C6CCD7;">s</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">hello</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//for i in &quot;hello&quot;.chars()</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">for</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> in</span><span style="color: #C6CCD7;"> s</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">chars</span><span>(){</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;{</span><span style="color: #98C379;">i</span><span>}&quot;);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="hashmap"><code>HashMap</code></h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">collections</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">HashMap</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let mut</span><span style="color: #C6CCD7;"> scores</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> HashMap</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">scores</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">insert</span><span>(&quot;</span><span style="color: #98C379;">Blue</span><span>&quot;</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">to_string</span><span>(),</span><span style="color: #56B6C2;">10</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//insert会夺走ownership</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> team_name</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">Blue</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> score</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> score</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">get</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">team_name</span><span>)</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">copied</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap_or</span><span>(</span><span style="color: #56B6C2;">0</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//get()返回一个Option&lt;&amp;V&gt;，copied返回Option&lt;&amp;V&gt;的一个拷贝，得到</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//ownership，用unwrap_or()“解包”返回一个i32</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">for</span><span> (</span><span style="color: #C6CCD7;">k</span><span>,</span><span style="color: #C6CCD7;">v</span><span>)</span><span style="color: #E06C75;"> in &amp;</span><span style="color: #C6CCD7;">scores</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;{</span><span style="color: #98C379;">k</span><span>}</span><span style="color: #98C379;">:</span><span>{</span><span style="color: #98C379;">v</span><span>}&quot;);</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">overwriting</span><span style="color: #E06C75;">:</span><span style="color: #B57EDC;"> insert</span><span>()</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">adding</span><span style="color: #E06C75;">:</span><span style="color: #B57EDC;"> entry</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">or_insert</span><span>()</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">//entry()return &amp;mut to the value and use or_insert() to insert</span></span></code></pre><h2 id="error-handling">Error Handling</h2>
+<h2 id="tong-cheng">统称</h2>
+<p>可用于<code>fn,struct,enum</code>
+e.g.</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> example</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;(</span><span style="color: #C6CCD7;">pa</span><span style="color: #E06C75;">:&amp;</span><span style="color: #E5C07B;">T</span><span>)</span><span style="color: #E06C75;">-&gt;&amp;</span><span style="color: #E5C07B;">T</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    do</span><span style="color: #C6CCD7;"> stuff</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">struct</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>,</span><span style="color: #E5C07B;">Y</span><span>&gt;{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    name</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">T</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    gender</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">Y</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> E</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;{</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    name</span><span>(</span><span style="color: #E5C07B;">T</span><span>),</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> example</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span style="color: #E06C75;">:</span><span style="color: #C6CCD7;"> some_trait</span><span>&gt;(</span><span style="color: #C6CCD7;">pa</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">T</span><span>){</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    //pass</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="te-dian">特点</h2>
+<h3 id="te-dian-de-sheng-ming">特点的声明：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> trait</span><span style="color: #E5C07B;"> Summary</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> summarize</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;">-&gt;</span><span style="color: #E5C07B;">String</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="shi-yong-guan-jian-ci-forfu-yu-jie-gou-te-dian-li-zi-gei-liang-ge-bu-tong-de-jie-gou-ti-fu-yu-summaryde-te-dian">使用关键词<code>for</code>赋予结构特点，例子给两个不同的结构体赋予<code>Summary</code>的特点：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> struct</span><span style="color: #E5C07B;"> NewsArticle</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub</span><span style="color: #C6CCD7;"> headline</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub</span><span style="color: #C6CCD7;"> location</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub</span><span style="color: #C6CCD7;"> author</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub</span><span style="color: #C6CCD7;"> content</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Summary</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> NewsArticle</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> summarize</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> String</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    format!</span><span>(&quot;{}</span><span style="color: #98C379;">, by </span><span>{}</span><span style="color: #98C379;"> (</span><span>{}</span><span style="color: #98C379;">)</span><span>&quot;,</span><span style="color: #E06C75;"> self.</span><span>headline,</span><span style="color: #E06C75;">self.</span><span>author,</span><span style="color: #E06C75;">self.</span><span>location)</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> struct</span><span style="color: #E5C07B;"> Tweet</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub</span><span style="color: #C6CCD7;"> username</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub</span><span style="color: #C6CCD7;"> content</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Summary</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> Tweet</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> summarize</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> String</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        format!</span><span>(&quot;{}</span><span style="color: #98C379;">: </span><span>{}&quot;,</span><span style="color: #E06C75;"> self.</span><span>username,</span><span style="color: #E06C75;"> self.</span><span>content)</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="diao-yong-fang-shi-lei-si-han-shu">调用方式，类似函数：</h3>
+<p>这里use还要包括<code>Summary</code>，因为<code>trait</code>是储存在块本地的；
+另外，已经定义的结构和特点不能重复定义</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> aggregator</span><span style="color: #E06C75;">::</span><span>{</span><span style="color: #E5C07B;">Summary</span><span>,</span><span style="color: #E5C07B;"> Tweet</span><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> tweet</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Tweet</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        username</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">horse_ebooks</span><span>&quot;),</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        content</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">of course, as you probably already know, people</span><span>&quot;,</span></span>
+<span class="giallo-l"><span>        ),</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        reply</span><span style="color: #E06C75;">:</span><span style="color: #56B6C2;"> false</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        retweet</span><span style="color: #E06C75;">:</span><span style="color: #56B6C2;"> false</span><span>,</span></span>
+<span class="giallo-l"><span>    };</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">1 new tweet: </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> tweet</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">summarize</span><span>());</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="ke-yi-she-zhi-mo-ren-de-te-dian">可以设置默认的特点：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> trait</span><span style="color: #E5C07B;"> Summary</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> summarize</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> String</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">        String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">Read more...</span><span>&quot;)</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Summary</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> NewsArticle</span><span> {}</span><span style="color: #5F6672;font-style: italic;"> //必须有这句话，而且括号内没有对应的方法</span></span></code></pre><h3 id="ba-te-dian-zuo-wei-han-shu-can-shu">把特点作为函数参数：</h3>
+<p>把特点作为参数的意义在于，任何实现了这个特点的数据类型都能作为这个函数的参数</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> notify</span><span>(</span><span style="color: #C6CCD7;">item</span><span style="color: #E06C75;">: &amp;impl</span><span style="color: #E5C07B;"> Summary</span><span>){</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Breaking news! </span><span>{}&quot;,</span><span style="color: #C6CCD7;">item</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">summarize</span><span>());</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> notify</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Summary</span><span>&gt;(</span><span style="color: #C6CCD7;">item</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> T</span><span>){</span><span style="color: #5F6672;font-style: italic;">//等价</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Breaking news! </span><span>{}&quot;,</span><span style="color: #C6CCD7;">item</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">summarize</span><span>());</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="tong-shi-man-zu-duo-ge-te-dian">同时满足多个特点：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> notify</span><span>(</span><span style="color: #C6CCD7;">item</span><span style="color: #E06C75;">: &amp;</span><span>(</span><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Summary</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> Display</span><span>)) {}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> notify</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Summary</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> Display</span><span>&gt;(</span><span style="color: #C6CCD7;">item</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">T</span><span>){}</span></span></code></pre><h3 id="geng-duo-li-zi">更多例子：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> func</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Display</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> Clone</span><span>,</span><span style="color: #E5C07B;"> U</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Clone</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> Debug</span><span>&gt;(</span><span style="color: #C6CCD7;">t</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">T</span><span>,</span><span style="color: #C6CCD7;"> u</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">U</span><span>){}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> func</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>,</span><span style="color: #E5C07B;">U</span><span>&gt;(</span><span style="color: #C6CCD7;">t</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">T</span><span>,</span><span style="color: #C6CCD7;"> u</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">U</span><span>)</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">where</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Display</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> Clone</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    U</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Clone</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> Denug</span><span>,</span></span>
+<span class="giallo-l"><span>{}</span></span></code></pre><h3 id="yao-qiu-fan-hui-zhi-shi-xian-te-dian">要求返回值实现特点：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> returns_summarizable</span><span>()</span><span style="color: #E06C75;"> -&gt; impl</span><span style="color: #E5C07B;"> Summary</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Article</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        name</span><span style="color: #E06C75;">:</span><span>&quot;</span><span style="color: #98C379;">Jane</span><span>&quot;</span><span style="color: #E06C75;">.</span><span>to_string,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        published</span><span style="color: #E06C75;">:</span><span style="color: #56B6C2;">false</span><span>,</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="shi-xian-bao-han-fan-xing-de-jie-gou-fang-fa-shi-qu-bie-dui-dai">实现包含泛型的结构方法时，区别对待：</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #E5C07B;"> Pair</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    x</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">T</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    y</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">T</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;</span><span style="color: #E5C07B;"> Pair</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> new</span><span>(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">T</span><span>,</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">T</span><span>)</span><span style="color: #E06C75;">-&gt;Self</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        Self</span><span> {</span><span style="color: #C6CCD7;"> x</span><span>,</span><span style="color: #C6CCD7;"> y</span><span> }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Display</span><span style="color: #E06C75;"> +</span><span style="color: #E5C07B;"> ParialOrd</span><span>&gt;</span><span style="color: #E5C07B;"> Pari</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> cmp_display</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if self.</span><span>x </span><span style="color: #E06C75;">&gt;= self.</span><span>y {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            ...</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            ...</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="lifetime"><code>Lifetime</code></h2>
+<p>基本的在之前已经提到过</p>
+<h3 id="borrow-checker"><code>Borrow Checker</code></h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> r</span><span>;</span><span style="color: #5F6672;font-style: italic;">                // ---------+-- &#39;a</span></span>
+<span class="giallo-l"><span>    {</span><span style="color: #5F6672;font-style: italic;">                     //          |</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 5</span><span>;</span><span style="color: #5F6672;font-style: italic;">        // -+-- &#39;b  |</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        r</span><span style="color: #E06C75;"> = &amp;</span><span style="color: #C6CCD7;">x</span><span>;</span><span style="color: #5F6672;font-style: italic;">           //  |       |</span></span>
+<span class="giallo-l"><span>    }</span><span style="color: #5F6672;font-style: italic;">                     // -+       |</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">r: </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> r</span><span>);</span><span style="color: #5F6672;font-style: italic;"> //          |</span></span>
+<span class="giallo-l"><span>}</span><span style="color: #5F6672;font-style: italic;">                         // ---------+</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 5</span><span>;</span><span style="color: #5F6672;font-style: italic;">            // ----------+-- &#39;b</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> r</span><span style="color: #E06C75;"> = &amp;</span><span style="color: #C6CCD7;">x</span><span>;</span><span style="color: #5F6672;font-style: italic;">           // --+-- &#39;a  |</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">r: </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> r</span><span>);</span><span style="color: #5F6672;font-style: italic;"> // --+       |</span></span>
+<span class="giallo-l"><span>}</span><span style="color: #5F6672;font-style: italic;">                         // ----------+</span></span></code></pre><h3 id="can-shu-wei-yin-yong-bian-yi-qi-wu-fa-pan-duan-sheng-ming-zhou-qi-shi">参数为引用编译器无法判断生命周期时</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> longest</span><span>(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>,</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span style="color: #E5C07B;">str</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    if</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>() &gt;</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        x</span></span>
+<span class="giallo-l"><span>    }</span><span style="color: #E06C75;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        y</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> longest</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>{}</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// 参数和返回值具有相同的生命周期&#39;a </span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// 返回值的lifetime = min(x,y)</span></span></code></pre>
+<p>之所以参数都要需要标记，是因为<code>x</code>，<code>y</code>都有可能被返回</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> longest</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    x</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="jie-gou-ti-nei-de-bian-liang-ye-ke-yi-shi-yin-yong-dan-shi-bi-xu-zhi-ming-sheng-ming-zhou-qi">结构体内的变量也可以是引用，但是必须指明生命周期</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #E5C07B;"> SSS</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    a_str</span><span style="color: #E06C75;">:&amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span></span>
+<span class="giallo-l"><span>}</span><span style="color: #5F6672;font-style: italic;">//意味着，一个SSS实例的lifetime不能大于a_str</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>(){</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> sss</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> SSS</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        a_str</span><span style="color: #E06C75;">:</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let</span><span style="color: #C6CCD7;"> tmp</span><span style="color: #E06C75;"> =</span><span> &quot;</span><span style="color: #98C379;">hello</span><span>&quot;</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">to_string</span><span>();</span><span style="color: #5F6672;font-style: italic;">//生命周期过短</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            tmp</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">as_str</span><span>()</span></span>
+<span class="giallo-l"><span>        },</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">        //a_str:&quot;hello&quot;,//正常运行</span></span>
+<span class="giallo-l"><span>    };</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;{}&quot;,</span><span style="color: #C6CCD7;">sss</span><span style="color: #E06C75;">.</span><span>a_str);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="wu-xu-sheng-ming-sheng-ming-zhou-qi-de-qing-kuang-lifetime-elision-rules">无需声明生命周期的情况(<code>lifetime elision rules</code>)</h3>
+<p>编译器检查生命周期的三条规则，一旦能确认所有参数和输出值的生命周期，编译器不强制要求添加<code>lifetime annotation</code>：</p>
+<ol>
+<li>
+<p>给每个参数赋予不同的生命周期</p>
+</li>
+<li>
+<p>只有一个参数时，返回值的生命周期和这个参数一样</p>
+</li>
+<li>
+<p>当参数形式为<code>&amp;self</code>时，因为<code>self</code>，所以所有生命周期都是<code>self</code>的生命周期</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> first_word</span><span>(</span><span style="color: #C6CCD7;">s</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span style="color: #E5C07B;">str</span><span>{</span><span style="color: #5F6672;font-style: italic;">//rule 1</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> first_word</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;(</span><span style="color: #C6CCD7;">s</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span style="color: #E5C07B;">str</span><span>{</span><span style="color: #5F6672;font-style: italic;">//rule 2</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> first_word</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>&gt;(</span><span style="color: #C6CCD7;">s</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>{</span><span style="color: #5F6672;font-style: italic;">//rule 3</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> longest</span><span>(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>,</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span style="color: #E5C07B;">str</span><span> {</span><span style="color: #5F6672;font-style: italic;">//rule1</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> longest</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>, &#39;</span><span style="color: #E5C07B;">b</span><span>&gt;(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">b str</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span style="color: #E5C07B;">str</span><span> {</span><span style="color: #5F6672;font-style: italic;">//rule2</span></span></code></pre></li>
+</ol>
+<h2 id="fan-xing-te-dian-sheng-ming-zhou-qi-da-za-hui">泛型、特点、生命周期大杂烩</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">fmt</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Display</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> longest_with_an_announcement</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>,</span><span style="color: #E5C07B;"> T</span><span>&gt;(</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">   x</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    y</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    ann</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> T</span><span>,</span></span>
+<span class="giallo-l"><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a str</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">where</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Display</span><span>,</span></span>
+<span class="giallo-l"><span>{</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Announcement! </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> ann</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    if</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>() &gt;</span><span style="color: #C6CCD7;"> y</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        x</span></span>
+<span class="giallo-l"><span>    }</span><span style="color: #E06C75;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        y</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="ce-shi">测试</h2>
+<h3 id="san-ge-ce-shi-han-shu">三个测试函数</h3>
+<p>在<code>Rust</code>中，可以为自己编写的程序编写测试以测试代码的正确性。
+在终端调用<code>cargo new proj_name --lib</code>会自动生成项目，<code>src</code>文件夹的<code>lib.rs</code>会自带<code>test module</code>。</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[cfg(test)]</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">mod</span><span> tests {</span></span>
+<span class="giallo-l"><span>    #[test]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> it_works</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> result</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 2</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 2</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        assert_eq!</span><span>(</span><span style="color: #C6CCD7;">result</span><span>,</span><span style="color: #56B6C2;"> 4</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>其中<code>#[tests]</code>用来指示接下来的函数是用于测试的函数，<code>assert_eq!()</code>判断参数是否相同，当结果不同或者代码发生<code>panic!</code>就会测试失败，另<code>assert_ne!()</code>则判断是否不同。</p>
+<p><code>assert!</code>参数类型是<code>Boolean</code>，如果参数为<code>false</code>则测试失败。</p>
+<h3 id="partialeq-debug-te-dian">PartialEq Debug 特点</h3>
+<p>如果一个结构体或者枚举想要作为参数传入上述函数，必须实现<code>PartialEq</code>和<code>Debug</code>这两个特点，（前者在于<code>==、!=</code>的比较，后者在于代码判断为<code>Failed</code>时要打印错误信息）</p>
+<h3 id="zi-ding-yi-shi-bai-xin-xi">自定义失败信息</h3>
+<p><code>assert</code>函数第二个参数即为自定义字符串信息：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub fn</span><span style="color: #B57EDC;"> greeting</span><span>(</span><span style="color: #C6CCD7;">name</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> String</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">Hello!</span><span>&quot;)</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span>#[cfg(test)]</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">mod</span><span> tests {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    use super::*</span><span>;</span></span>
+<span class="giallo-l"><span>    #[test]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> greeting_contains_name</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> result</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> greeting</span><span>(&quot;</span><span style="color: #98C379;">Carol</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        assert!</span><span>(</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            result</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">contains</span><span>(&quot;</span><span style="color: #98C379;">Carol</span><span>&quot;),</span></span>
+<span class="giallo-l"><span>            &quot;</span><span style="color: #98C379;">Greeting did not contain name, value was `</span><span>{}</span><span style="color: #98C379;">`</span><span>&quot;,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            result</span></span>
+<span class="giallo-l"><span>        );</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>报错信息则为<code>"Greeting did not contain name, value was 'Carol'"</code>。</p>
+<h3 id="should-panic">should_panic</h3>
+<p>在<code>#[test]</code>属性下一行添加<code>#[should_panic]</code>，让编译器认为检测函数应该<code>panic</code>，否则测试不通过。</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[test]</span></span>
+<span class="giallo-l"><span>#[should_panic]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> example</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    panic!</span><span>(&quot;</span><span style="color: #98C379;">This is supposed to panic.</span><span>&quot;);</span><span style="color: #5F6672;font-style: italic;">//测试ok</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>使用<code>expected</code>可以使<code>should_panic</code>更加精确：
+例如<code>#[should_panic(expected = "is supposed")]</code>替换上面的<code>#[should_panic]</code>，
+则测试可以通过，因为<code>panic contained expected string</code>。</p>
+<h3 id="result-t-e">Result&lt;T, E&gt;</h3>
+<p>在<code>test module</code>中，可以使用<code>Result</code>枚举来代替<code>assert</code>系列函数：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[cfg(test)]</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">mod</span><span> tests {</span></span>
+<span class="giallo-l"><span>    #[test]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> it_works</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Result</span><span>&lt;(),</span><span style="color: #E5C07B;"> String</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> value</span><span style="color: #E06C75;"> =</span><span> </span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if</span><span style="color: #56B6C2;"> 2</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 2</span><span style="color: #E06C75;"> ==</span><span style="color: #56B6C2;"> 4</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">            Ok</span><span>(())</span></span>
+<span class="giallo-l"><span>        }</span><span style="color: #E06C75;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">            Err</span><span>(</span><span style="color: #E5C07B;">String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">two plus two does not equal four</span><span>&quot;))</span></span>
+<span class="giallo-l"><span>        };</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        value</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>值得注意的是，在这种情况下不能使用<code>should_panic</code>，非要使用的话，可以在函数最后<code>assert!(value.is_err())</code>;</p>
+<h3 id="kong-zhi-ce-shi-fang-shi">控制测试方式</h3>
+<p><code>cargo test</code></p>
+<ol>
+<li><code>-- --test-thread=1 </code>线程设置为<code>1</code>，禁止测试函数并行运行</li>
+<li><code>-- --show-output </code>就算测试不通过也打印过程中<code>println</code>的信息</li>
+<li><code>cargo test prefix*</code> 只测试以<code>prefix</code>打头的函数</li>
+<li>在代码中<code>#[test]</code>下一行添加<code>#[ignore]</code>可以使测试忽略当前函数</li>
+<li><code>-- --ignored</code> 只运行标记了<code>ignore</code>的函数</li>
+</ol>
+<h3 id="dan-yuan-ce-shi-he-ji-cheng-ce-shi">单元测试和集成测试</h3>
+<p>单元测试：
+更小更集中，在隔离的环境中测试一个模块，上面的例子都是单元测试；
+使用<code>#[cfg(test)]</code>标注，只在<code>cargo test</code>时编译和运行</p>
+<p>集成测试：
+在外部的，位于与一般代码相同的文件中。需要新建与<code>src</code>同级的<code>tests</code>目录，在目录下新建<code>test_name.rs</code>，需要使用<code>use</code>导入测试目标<code>crate</code>，代码无需<code>cfg</code>标记，只需在每个测试函数前<code>#[test]</code>即可。</p>
+<h2 id="bi-bao">闭包</h2>
+<p>任何花括号包括的区域最后一条语句没有加分号都有返回值，{}闭包就是可以保存进变量 或 作为参数传递给其他函数 的 匿名函数。
+函数变量e.g.</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #C6CCD7;">  add_one_v1</span><span>   (</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> u32</span><span> {</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span> }</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> add_one_v2</span><span style="color: #E06C75;"> = |</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> u32</span><span style="color: #E06C75;">| -&gt;</span><span style="color: #E5C07B;"> u32</span><span> {</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span> };</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> add_one_v3</span><span style="color: #E06C75;"> = |</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">|</span><span>             {</span><span style="color: #C6CCD7;"> x</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span> };</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> add_one_v4</span><span style="color: #E06C75;"> = |</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">|</span><span style="color: #C6CCD7;">               x</span><span style="color: #E06C75;"> +</span><span style="color: #56B6C2;"> 1</span><span>  ;</span></span></code></pre><h2 id="die-dai-qi">迭代器</h2>
+<h3 id="iterator-next">Iterator &amp; next</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> trait</span><span style="color: #E5C07B;"> Iterator</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">  type</span><span style="color: #E5C07B;"> Item</span><span>;</span></span>
+<span class="giallo-l"><span>  </span></span>
+<span class="giallo-l"><span style="color: #E06C75;">  fn</span><span style="color: #B57EDC;"> next</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Option</span><span>&lt;</span><span style="color: #E06C75;">Self::</span><span style="color: #E5C07B;">Item</span><span>&gt;;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>如果直接把迭代器 <code>iter()</code> 赋值给变量 <code>v1</code>，那么在直接调用 <code>v1.next()</code> 要求 <code>v1 </code>是可变的，如果是 <code>for</code> 来遍历则不需要，因为 <code>rust </code>后台自动获取 <code>v1</code> 的所有权并使它可变。</p>
+<p>需要注意，<code>vector  </code>迭代器的 <code>next </code> 返回的是不可变引用，如果需要得到所有权，可以调用<code>into_iter</code>；如果需要可变迭代引用，可以调用 <code>iter_mut</code>。</p>
+<h3 id="xiao-fei-die-dai-qi-de-fang-fa">消费迭代器的方法</h3>
+<p><code>Iterator trait </code>中调用了 <code>next </code>的方法被称为<strong>消费适配器</strong>( <code>consuming adaptors</code> )，这些方法会消耗迭代器，夺走所有权。</p>
+<p>以sum为例：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[test]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> iterator_sum</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> v1</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> vec!</span><span>[</span><span style="color: #56B6C2;">1</span><span>,</span><span style="color: #56B6C2;"> 2</span><span>,</span><span style="color: #56B6C2;"> 3</span><span>];</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> v1_iter</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> v1</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">iter</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> total</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> i32</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> v1_iter</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">sum</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    assert_eq!</span><span>(</span><span style="color: #C6CCD7;">total</span><span>,</span><span style="color: #56B6C2;"> 6</span><span>);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>这里调用 <code>sum</code> 之后不再允许使用 <code>v1_iter</code>，因为所有权用完了。</p>
+<h3 id="jian-dan-bian-xie-zi-ding-yi-next">简单编写自定义next</h3>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #C6CCD7;"> cnt</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">  	count</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">u32</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #C6CCD7;"> cnt</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;"> 		fn</span><span style="color: #B57EDC;"> new</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #C6CCD7;"> cnt</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    		cnt</span><span>{</span><span style="color: #C6CCD7;">count</span><span style="color: #E06C75;">:</span><span style="color: #56B6C2;">0</span><span>}</span></span>
+<span class="giallo-l"><span>  	}</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span style="color: #E5C07B;"> Iterator</span><span style="color: #E06C75;"> for</span><span style="color: #C6CCD7;"> cnt</span><span>{</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">  	type</span><span style="color: #E5C07B;"> Item</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> u32</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">  	fn</span><span style="color: #B57EDC;"> next</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> Option</span><span>&lt;</span><span style="color: #E06C75;">Self::</span><span style="color: #E5C07B;">Item</span><span>&gt;{</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">      	self.</span><span>count </span><span style="color: #E06C75;">+=</span><span style="color: #56B6C2;"> 1</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    		if self.</span><span>count</span><span style="color: #E06C75;"> &lt;</span><span style="color: #56B6C2;"> 6</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">      			Some</span><span>(</span><span style="color: #E06C75;">self.</span><span>count)</span></span>
+<span class="giallo-l"><span>  			}</span><span style="color: #E06C75;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">      			None</span></span>
+<span class="giallo-l"><span>      	}</span></span>
+<span class="giallo-l"><span>  	}</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>这样，就可以获得可以<code>next</code>六次的迭代器了。</p>
+<h2 id="xun-huan-vsdie-dai-qi">循环VS迭代器</h2>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> buffer</span><span style="color: #E06C75;">: &amp;</span><span style="color: #61AFEF;">mut</span><span> [</span><span style="color: #E5C07B;">i32</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> coefficients</span><span style="color: #E06C75;">:</span><span> [</span><span style="color: #E5C07B;">i64</span><span>;</span><span style="color: #56B6C2;"> 12</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">let</span><span style="color: #C6CCD7;"> qlp_shift</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> i16</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">for</span><span style="color: #C6CCD7;"> i</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 12</span><span style="color: #E06C75;">..</span><span style="color: #C6CCD7;">buffer</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">      let</span><span style="color: #C6CCD7;"> prediction</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> coefficients</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">iter</span><span>()</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                                 .</span><span style="color: #B57EDC;">zip</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">buffer</span><span>[</span><span style="color: #C6CCD7;">i</span><span style="color: #E06C75;"> -</span><span style="color: #56B6C2;"> 12</span><span style="color: #E06C75;">..</span><span style="color: #C6CCD7;">i</span><span>])</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                                 .</span><span style="color: #B57EDC;">map</span><span>(</span><span style="color: #E06C75;">|</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">c</span><span>,</span><span style="color: #E06C75;"> &amp;</span><span style="color: #C6CCD7;">s</span><span>)</span><span style="color: #E06C75;">|</span><span style="color: #C6CCD7;"> c</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;"> s</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> i64</span><span>)</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">                                 .</span><span style="color: #B57EDC;">sum</span><span style="color: #E06C75;">::</span><span>&lt;</span><span style="color: #E5C07B;">i64</span><span>&gt;()</span><span style="color: #E06C75;"> &gt;&gt;</span><span style="color: #C6CCD7;"> qlp_shift</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> delta</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> buffer</span><span>[</span><span style="color: #C6CCD7;">i</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    buffer</span><span>[</span><span style="color: #C6CCD7;">i</span><span>]</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> prediction</span><span style="color: #E06C75;"> as</span><span style="color: #E5C07B;"> i32</span><span style="color: #E06C75;"> +</span><span style="color: #C6CCD7;"> delta</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>为了计算 <code>prediction</code> 的值，这些代码遍历了 <code>coefficients</code> 中的 12 个值，使用 <code>zip</code> 方法将系数与 <code>buffer</code> 的前 12 个值组合在一起。接着将每一对值相乘，再将所有结果相加，然后将总和右移 <code>qlp_shift</code> 位。</p>
+<p>这里，我们创建了一个迭代器，使用了两个适配器，接着消费了其值。Rust 代码将会被编译为什么样的汇编代码呢？遍历 <code>coefficients</code> 的值完全用不到循环：Rust 知道这里会迭代 12 次，所以它“展开”（unroll）了循环。展开是一种移除循环控制代码的开销并替换为每个迭代中的重复代码的优化。</p>
+<p>所有的系数都被储存在了寄存器中，这意味着访问他们非常快。这里也没有运行时数组访问边界检查。所有这些 Rust 能够提供的优化使得结果代码极为高效。</p>
+<h2 id="zhi-neng-zhi-zhen">智能指针</h2>
+<p>其实，应用最多的指针是 <code>&amp;</code> 引用，但是Rust中有一类结构实现了 <code>Deref</code> 和 <code>Drop</code> trait，前者让结构体实例能像引用那样（可以“解包”），后者可以自定义当智能指针离开作用域要运行的代码。</p>
+<p>其实，<code>String  </code> 和 <code>Vec&lt;T&gt;</code> 都属于智能指针。</p>
+<h3 id="box-t"><code>Box&lt;T&gt;</code></h3>
+<p>在堆上储存数据，在栈上储存指针。</p>
+<h4 id="di-gui-mei-ju">递归枚举</h4>
+<p>如果要自定义一个枚举列表：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> List</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    Cons</span><span>(</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;"> List</span><span>),</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Nil</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>上面的代码是不能编译的，因为List中永远有下一个List，而每个List都附带一个i32（在栈上），编译器不知道具体要分配多少空间。</p>
+<p><img src="/images/trpl15-01.svg" alt="An infinite Cons list" /></p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> List</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    Cons</span><span>(</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;"> Box</span><span>&lt;</span><span style="color: #E5C07B;">List</span><span>&gt;),</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Nil</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">use crate::</span><span style="color: #61AFEF;">List</span><span style="color: #E06C75;">::</span><span>{</span><span style="color: #E5C07B;">Cons</span><span>,</span><span style="color: #E5C07B;"> Nil</span><span>};</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> list</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> Cons</span><span>(</span><span style="color: #56B6C2;">1</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        Box</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #B57EDC;">Cons</span><span>(</span><span style="color: #56B6C2;">2</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            Box</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #B57EDC;">Cons</span><span>(</span><span style="color: #56B6C2;">3</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">                Box</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #E5C07B;">Nil</span><span>))))));</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>上面的代码就是可行的<img src="/images/trpl15-02.svg" alt="A finite Cons list" /></p>
+<h3 id="zi-ding-yi-yi-ge-zhi-neng-zhi-zhen">自定义一个智能指针</h3>
+<h4 id="shi-xian-deref-trait">实现Deref trait</h4>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">ops</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Deref</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">struct</span><span style="color: #E5C07B;"> MyBox</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;(</span><span style="color: #E5C07B;">T</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;</span><span style="color: #E5C07B;"> MyBox</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">  	fn</span><span style="color: #B57EDC;"> new</span><span>(</span><span style="color: #C6CCD7;">x</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;">T</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> MyBox</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">      	MyBox</span><span>(</span><span style="color: #C6CCD7;">x</span><span>)</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt;</span><span style="color: #E5C07B;"> Deref</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> MyBox</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    type</span><span style="color: #E5C07B;"> Target</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> T</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> deref</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>)</span><span style="color: #E06C75;"> -&gt; &amp;</span><span style="color: #E5C07B;">T</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        &amp;self.</span><span style="color: #56B6C2;">0</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>以上代码能够让 <code>MyBox</code> 能够像 <code>dereference</code> 引用 <code>&amp;</code> 一样解包 <code>MyBox</code> 实例，这里返回的是 <code>&amp;x</code>，因此实际Rust在底层运行的代码是：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">*</span><span>(</span><span style="color: #C6CCD7;">y</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">deref</span><span>())</span><span style="color: #5F6672;font-style: italic;">//y是一个MyBox实例，deref()返回的是引用</span></span></code></pre><h3 id="jie-zhu-deref-traitshi-xian-yin-shi-jie-yin-yong-qiang-zhi-zhuan-huan">借助Deref trait实现隐式解引用强制转换</h3>
+<p>有这样一个函数：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> hello</span><span>(</span><span style="color: #C6CCD7;">name</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Hello, </span><span>{}</span><span style="color: #98C379;">!</span><span>&quot;,</span><span style="color: #C6CCD7;"> name</span><span>);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>要求参数是 <code>&amp;str</code>，而：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> m</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> MyBox</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #61AFEF;">String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">Rust</span><span>&quot;));</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    hello</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">m</span><span>);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>这段代码却可以正常运行，这是因为 <code>MyBox</code> 和 <code>String</code> 都有实现 <code>Deref</code> trait，这里使用 <code>&amp;m</code> 调用 <code>hello</code> 函数，其为 <code>MyBox&lt;String&gt;</code> 值的引用。 Rust 可以通过 <code>deref</code> 调用将 <code>&amp;MyBox&lt;String&gt;</code> 变为 <code>&amp;String</code>。Rust 再次调用 <code>deref</code> 将 <code>&amp;String</code> 变为 <code>&amp;str</code>，这就符合 <code>hello</code> 函数的定义了。</p>
+<p>如果没有实现解引用强制转换，代码将必须写成这样：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> m</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> MyBox</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #61AFEF;">String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">Rust</span><span>&quot;));</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    hello</span><span>(</span><span style="color: #E06C75;">&amp;</span><span>(</span><span style="color: #E06C75;">*</span><span style="color: #C6CCD7;">m</span><span>)[</span><span style="color: #E06C75;">..</span><span>]);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>以上解析都是发生在编译时，不会有运行损耗。</p>
+<h3 id="drop-trait">Drop Trait</h3>
+<p>之所以把 <code>Drop</code> trait 放在智能指针这里，是因为 <code>Drop</code> 几乎都是用于实现智能指针。</p>
+<p>可以直接把 <code>Drop</code> 里的 <code>drop()</code> 理解为析构函数，我们不能直接调用 <code>drop</code> 因为这样的话作用域结束后又会调用一次，如果需要提前释放变量可以使用 <code>std::mem::drop</code> 这个函数不同于前者，位于 prelude 中，通过调用它可以提前释放变量。无需担心之后发生“空指针”的问题，因为编译起会帮你检测，确保引用总是有效的。</p>
+<h3 id="rc-t-yin-yong-ji-shu-zhi-neng-zhi-zhen"><code>Rc&lt;T&gt;</code> 引用计数智能指针</h3>
+<p>Rust 内置一个叫做 <code>Rc&lt;T&gt;</code> 的类型，是 <code>reference counting</code> 的缩写。</p>
+<p><code>Rc&lt;T&gt;</code> 用于当我们希望在堆上分配内存给程序多个部分读取，而且无法在编译时确定程序的哪一部分会最后结束使用它的时候。如果确实知道哪一部分是最后结束使用的话，就能令其成为数据的所有者，正常的所有权规则就可以在编译时运行。</p>
+<p><code>RC&lt;T&gt;</code> 只能用于单线程场景。</p>
+<p>类似浅拷贝，不会完整拷贝 <code>T</code> 所有数据，而是让<strong>引用计数</strong>增加。在场景：多个列表需要共享一段列表时，不会有所有权“不够用”或者深拷贝低效率的问题。</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> List</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    Cons</span><span>(</span><span style="color: #E5C07B;">i32</span><span>,</span><span style="color: #E5C07B;"> Rc</span><span>&lt;</span><span style="color: #E5C07B;">List</span><span>&gt;),</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Nil</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">use crate::</span><span style="color: #61AFEF;">List</span><span style="color: #E06C75;">::</span><span>{</span><span style="color: #E5C07B;">Cons</span><span>,</span><span style="color: #E5C07B;"> Nil</span><span>};</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">rc</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Rc</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> a</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #B57EDC;">Cons</span><span>(</span><span style="color: #56B6C2;">5</span><span>,</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #B57EDC;">Cons</span><span>(</span><span style="color: #56B6C2;">10</span><span>,</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #E5C07B;">Nil</span><span>)))));</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">count after creating a = </span><span>{}&quot;,</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">strong_count</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> b</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> Cons</span><span>(</span><span style="color: #56B6C2;">3</span><span>,</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">clone</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">count after creating b = </span><span>{}&quot;,</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">strong_count</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span>    {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> c</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> Cons</span><span>(</span><span style="color: #56B6C2;">4</span><span>,</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">clone</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        println!</span><span>(&quot;</span><span style="color: #98C379;">count after creating c = </span><span>{}&quot;,</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">strong_count</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">count after c goes out of scope = </span><span>{}&quot;,</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">strong_count</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #56B6C2;">OUTPUT</span><span style="color: #E06C75;">:</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">count after creating a</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 1</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">count after creating b</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 2</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">count after creating c</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 3</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">count after c goes out of scope</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 2</span></span></code></pre>
+<p><code>Rc&lt;T&gt;</code> 允许程序多个部分只读共享数据。</p>
+<h3 id="refcell-t-he-nei-bu-ke-bian-xing-mo-shi"><code>RefCell&lt;T&gt;</code> 和内部可变性模式</h3>
+<p><strong>内部可变性</strong>（<em>Interior mutability</em>）是 Rust 中的一个设计模式，允许你在有不可变量引用存在的情况下也能改变数据。使用 <code>unsafe</code> 来模糊 Rust 通常的可变性和借用规则。</p>
+<ul>
+<li>
+<p><code>RefCell&lt;T&gt;</code> 代表其数据唯一所有权。</p>
+</li>
+<li>
+<p><code>RefCell&lt;T&gt;</code> 用于当你确定代码是正确的，但是编译器不这么认为的时候。</p>
+</li>
+<li>
+<p><code>RefCell&lt;T&gt;</code> 同样只能用于单线程场景。</p>
+</li>
+</ul>
+<p>如下为选择 <code>Box&lt;T&gt;</code>，<code>Rc&lt;T&gt;</code> 或 <code>RefCell&lt;T&gt;</code> 的理由：</p>
+<ul>
+<li><code>Rc&lt;T&gt;</code> 允许相同数据有多个所有者；<code>Box&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 有单一所有者。</li>
+<li><code>Box&lt;T&gt;</code> 允许在编译时执行不可变或可变借用检查；<code>Rc&lt;T&gt;</code>仅允许在编译时执行不可变借用检查；<code>RefCell&lt;T&gt;</code> 允许在运行时执行不可变或可变借用检查。</li>
+<li>因为 <code>RefCell&lt;T&gt;</code> 允许在运行时执行可变借用检查，所以我们可以在即便 <code>RefCell&lt;T&gt;</code> 自身是不可变的情况下修改其内部的值。</li>
+</ul>
+<p>假如现在有一个结构 <code>A</code> ，结构 <code>B</code> 内的变量有 <code>&amp;A</code> ，一般来说，我们是不能改变 <code>B</code> 的，因为它不是可变引用，但是如果 <code>B</code> 里面的某个变量是 <code>RefCell&lt;T&gt;</code> ，那么就可以调用 <code>B.some_variable.borrow_mut()</code> ，这会返回一个可变引用在<strong>内部</strong>实现数据更改。</p>
+<p>实例代码：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> trait</span><span style="color: #E5C07B;"> Messenger</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> send</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>,</span><span style="color: #C6CCD7;"> msg</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>);</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">pub</span><span style="color: #61AFEF;"> struct</span><span style="color: #E5C07B;"> LimitTracker</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>,</span><span style="color: #E5C07B;"> T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Messenger</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    messenger</span><span style="color: #E06C75;">: &amp;</span><span>&#39;</span><span style="color: #E5C07B;">a T</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    value</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> usize</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    max</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> usize</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">impl</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>,</span><span style="color: #E5C07B;"> T</span><span>&gt;</span><span style="color: #E5C07B;"> LimitTracker</span><span>&lt;&#39;</span><span style="color: #E5C07B;">a</span><span>,</span><span style="color: #E5C07B;"> T</span><span>&gt;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    where</span><span style="color: #E5C07B;"> T</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> Messenger</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> new</span><span>(</span><span style="color: #C6CCD7;">messenger</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">T</span><span>,</span><span style="color: #C6CCD7;"> max</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> usize</span><span>)</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> LimitTracker</span><span>&lt;</span><span style="color: #E5C07B;">T</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">        LimitTracker</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            messenger</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            value</span><span style="color: #E06C75;">:</span><span style="color: #56B6C2;"> 0</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            max</span><span>,</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    pub fn</span><span style="color: #B57EDC;"> set_value</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #61AFEF;">mut</span><span style="color: #E06C75;"> self</span><span>,</span><span style="color: #C6CCD7;"> value</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> usize</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        self.</span><span>value </span><span style="color: #E06C75;">=</span><span style="color: #C6CCD7;"> value</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> percentage_of_max</span><span style="color: #E06C75;"> = self.</span><span>value </span><span style="color: #E06C75;">as</span><span style="color: #E5C07B;"> f64</span><span style="color: #E06C75;"> / self.</span><span>max </span><span style="color: #E06C75;">as</span><span style="color: #E5C07B;"> f64</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        if</span><span style="color: #C6CCD7;"> percentage_of_max</span><span style="color: #E06C75;"> &gt;=</span><span style="color: #56B6C2;"> 1</span><span>.</span><span style="color: #56B6C2;">0</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>messenger</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">send</span><span>(&quot;</span><span style="color: #98C379;">Error: You are over your quota!</span><span>&quot;);</span></span>
+<span class="giallo-l"><span>        }</span><span style="color: #E06C75;"> else if</span><span style="color: #C6CCD7;"> percentage_of_max</span><span style="color: #E06C75;"> &gt;=</span><span style="color: #56B6C2;"> 0</span><span>.</span><span style="color: #56B6C2;">9</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">             self.</span><span>messenger</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">send</span><span>(&quot;</span><span style="color: #98C379;">Urgent warning: You&#39;ve used up over 90% of your quota!</span><span>&quot;);</span></span>
+<span class="giallo-l"><span>        }</span><span style="color: #E06C75;"> else if</span><span style="color: #C6CCD7;"> percentage_of_max</span><span style="color: #E06C75;"> &gt;=</span><span style="color: #56B6C2;"> 0</span><span>.</span><span style="color: #56B6C2;">75</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>messenger</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">send</span><span>(&quot;</span><span style="color: #98C379;">Warning: You&#39;ve used up over 75% of your quota!</span><span>&quot;);</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#[cfg(test)]</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">mod</span><span> tests {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    use super::*</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">cell</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">RefCell</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    struct</span><span style="color: #E5C07B;"> MockMessenger</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        sent_messages</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> RefCell</span><span>&lt;</span><span style="color: #E5C07B;">Vec</span><span>&lt;</span><span style="color: #E5C07B;">String</span><span>&gt;&gt;,</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    impl</span><span style="color: #E5C07B;"> MockMessenger</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        fn</span><span style="color: #B57EDC;"> new</span><span>()</span><span style="color: #E06C75;"> -&gt;</span><span style="color: #E5C07B;"> MockMessenger</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">            MockMessenger</span><span> {</span><span style="color: #C6CCD7;"> sent_messages</span><span style="color: #E06C75;">:</span><span style="color: #E5C07B;"> RefCell</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #B57EDC;">vec!</span><span>[]) }</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    impl</span><span style="color: #E5C07B;"> Messenger</span><span style="color: #E06C75;"> for</span><span style="color: #E5C07B;"> MockMessenger</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        fn</span><span style="color: #B57EDC;"> send</span><span>(</span><span style="color: #E06C75;">&amp;self</span><span>,</span><span style="color: #C6CCD7;"> message</span><span style="color: #E06C75;">: &amp;</span><span style="color: #E5C07B;">str</span><span>) {</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            self.</span><span>sent_messages</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">borrow_mut</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">push</span><span>(</span><span style="color: #61AFEF;">String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(</span><span style="color: #C6CCD7;">message</span><span>));</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    #[test]</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    fn</span><span style="color: #B57EDC;"> it_sends_an_over_75_percent_warning_message</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">        // --snip--</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> mock_messenger</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> MockMessenger</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let mut</span><span style="color: #C6CCD7;"> limit_tracker</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> LimitTracker</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">mock_messenger</span><span>,</span><span style="color: #56B6C2;"> 100</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        limit_tracker</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">set_value</span><span>(</span><span style="color: #56B6C2;">75</span><span>);</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        assert_eq!</span><span>(</span><span style="color: #C6CCD7;">mock_messenger</span><span style="color: #E06C75;">.</span><span>sent_messages</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">borrow</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">len</span><span>(),</span><span style="color: #56B6C2;"> 1</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {}</span></span></code></pre><h4 id="yuan-li">原理</h4>
+<p><code>borrow</code> 返回 <code>Ref&lt;T&gt;</code>，而 <code>borrow_mut</code> 则返回 <code>RefMut&lt;T&gt;</code> 二者都是智能指针。类似的，<code>RefCell</code> 只允许有多个不可变借用或一个可变借用。如果违反规则的话，相比编译时出错， <code>RefCell&lt;T&gt;</code> 会在运行时 panic。</p>
+<h3 id="rc-t-he-refcell-t-da-pei-shi-yong"><code>Rc&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code>搭配使用</h3>
+<ul>
+<li><code>Rc&lt;T&gt;</code> 允许统一数据有多个所有者但不可变引用</li>
+<li><code>RefCell</code> 可以返回可变引用修改不可变引用的值</li>
+</ul>
+<p>由此，如果 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code> 这样存放数据，就可以得到多个所有者<strong>并且</strong>可以修改的值了。</p>
+<p>例子：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span>#[derive(</span><span style="color: #E5C07B;">Debug</span><span>)]</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">enum</span><span style="color: #E5C07B;"> List</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    Cons</span><span>(</span><span style="color: #E5C07B;">Rc</span><span>&lt;</span><span style="color: #E5C07B;">RefCell</span><span>&lt;</span><span style="color: #E5C07B;">i32</span><span>&gt;&gt;,</span><span style="color: #E5C07B;"> Rc</span><span>&lt;</span><span style="color: #E5C07B;">List</span><span>&gt;),</span></span>
+<span class="giallo-l"><span style="color: #E5C07B;">    Nil</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">use crate::</span><span style="color: #61AFEF;">List</span><span style="color: #E06C75;">::</span><span>{</span><span style="color: #E5C07B;">Cons</span><span>,</span><span style="color: #E5C07B;"> Nil</span><span>};</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">rc</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Rc</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">cell</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">RefCell</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> value</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #61AFEF;">RefCell</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #56B6C2;">5</span><span>));</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> a</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #B57EDC;">Cons</span><span>(</span><span style="color: #61AFEF;">Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">clone</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">value</span><span>),</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #E5C07B;">Nil</span><span>)));</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> b</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> Cons</span><span>(</span><span style="color: #61AFEF;">Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #61AFEF;">RefCell</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #56B6C2;">6</span><span>)),</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">clone</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> c</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> Cons</span><span>(</span><span style="color: #61AFEF;">Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #61AFEF;">RefCell</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #56B6C2;">10</span><span>)),</span><span style="color: #61AFEF;"> Rc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">clone</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">a</span><span>));</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    *</span><span style="color: #C6CCD7;">value</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">borrow_mut</span><span>()</span><span style="color: #E06C75;"> +=</span><span style="color: #56B6C2;"> 10</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    // 这里*解引用得到 RefCell，然后对其调用.borrow_mut</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">a after = </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> a</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">b after = </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> b</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">c after = </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> c</span><span>);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="li-yong-thread-spawn-shi-xian-duo-xian-cheng">利用 <code>thread::spawn</code> 实现多线程</h3>
+<p>结合闭包和 <code>spawn</code> 函数产生子线程：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span>thread;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> v</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> vec!</span><span>[</span><span style="color: #56B6C2;">1</span><span>,</span><span style="color: #56B6C2;"> 2</span><span>,</span><span style="color: #56B6C2;"> 3</span><span>];</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> a</span><span style="color: #E06C75;"> =</span><span> &#39;</span><span style="color: #98C379;">a</span><span>&#39;;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> handle</span><span style="color: #E06C75;"> =</span><span style="color: #61AFEF;"> thread</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">spawn</span><span>(</span><span style="color: #E06C75;">move ||</span><span> {</span><span style="color: #5F6672;font-style: italic;">//转移所有权</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        println!</span><span>(&quot;</span><span style="color: #98C379;">Here&#39;s a vector: </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> v</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        println!</span><span>(&quot;</span><span style="color: #98C379;">Here&#39;s a character: </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> a</span><span>);</span></span>
+<span class="giallo-l"><span>    });</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    print!</span><span>(&quot;</span><span style="color: #98C379;">Here&#39;s a character: </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> a</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">    //println!(&quot;Here&#39;s a vector: {:?}&quot;, v);会报错，无所有权</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">    handle</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">join</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span><span style="color: #5F6672;font-style: italic;">//等待子线程结束</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h3 id="li-yong-mpsc-channel-chuang-jian-tong-dao-yong-yu-jin-cheng-jian-tong-xun">利用 <code>mpsc::channel</code> 创建通道用于进程间通讯</h3>
+<p><code>mpsc</code> 的含义是 <em>mutiple producer, single consumer</em>。</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span>thread;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">sync</span><span style="color: #E06C75;">::</span><span>mpsc;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span> (</span><span style="color: #C6CCD7;">tx</span><span>,</span><span style="color: #C6CCD7;"> rx</span><span>)</span><span style="color: #E06C75;"> =</span><span style="color: #61AFEF;"> mpsc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">channel</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    thread</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">spawn</span><span>(</span><span style="color: #E06C75;">move ||</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> val</span><span style="color: #E06C75;"> =</span><span style="color: #61AFEF;"> String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">hi</span><span>&quot;);</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        tx</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">send</span><span>(</span><span style="color: #C6CCD7;">val</span><span>)</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span>    });</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> received</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> rx</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">recv</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">  //rx.try_recv()尝试接收但是不阻塞</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Got: </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> received</span><span>);</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>使用 <code>send</code> 发送讯息，同样送走了变量的所有权（堆）。</p>
+<p>可以将 <code>rx</code> 作为一个迭代器使用：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span>thread;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">sync</span><span style="color: #E06C75;">::</span><span>mpsc;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">time</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Duration</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span> (</span><span style="color: #C6CCD7;">tx</span><span>,</span><span style="color: #C6CCD7;"> rx</span><span>)</span><span style="color: #E06C75;"> =</span><span style="color: #61AFEF;"> mpsc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">channel</span><span>();</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    thread</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">spawn</span><span>(</span><span style="color: #E06C75;">move ||</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> vals</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> vec!</span><span>[</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">hi</span><span>&quot;),</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">from</span><span>&quot;),</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">the</span><span>&quot;),</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            String</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from</span><span>(&quot;</span><span style="color: #98C379;">thread</span><span>&quot;),</span></span>
+<span class="giallo-l"><span>        ];</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">        for</span><span style="color: #C6CCD7;"> val</span><span style="color: #E06C75;"> in</span><span style="color: #C6CCD7;"> vals</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">            tx</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">send</span><span>(</span><span style="color: #C6CCD7;">val</span><span>)</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            thread</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">sleep</span><span>(</span><span style="color: #61AFEF;">Duration</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">from_secs</span><span>(</span><span style="color: #56B6C2;">1</span><span>));</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"><span>    });</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span style="color: #C6CCD7;"> received</span><span style="color: #E06C75;"> in</span><span style="color: #C6CCD7;"> rx</span><span> {</span><span style="color: #5F6672;font-style: italic;">//这里！阻塞地等待</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">        println!</span><span>(&quot;</span><span style="color: #98C379;">Got: </span><span>{}&quot;,</span><span style="color: #C6CCD7;"> received</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>如果要实现多个生产者端口，可以使用 <code>clone</code> 得到多个 <code>tx</code>。</p>
+<h3 id="mutex-t-hu-chi-qi"><code>Mutex&lt;T&gt;</code> 互斥器</h3>
+<p>单线程 <code>Mutex</code> 的一个简单实例：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">sync</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Mutex</span><span>;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> m</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Mutex</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #56B6C2;">5</span><span>);</span><span style="color: #5F6672;font-style: italic;">//创建Mutex</span></span>
+<span class="giallo-l"><span>    {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let mut</span><span style="color: #C6CCD7;"> num</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> m</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">lock</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span><span style="color: #5F6672;font-style: italic;">//返回Mutex内的可变引用</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">        *</span><span style="color: #C6CCD7;">num</span><span style="color: #E06C75;"> =</span><span style="color: #56B6C2;"> 6</span><span>;</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">m = </span><span>{</span><span style="color: #98C379;">:?</span><span>}&quot;,</span><span style="color: #C6CCD7;"> m</span><span>);</span><span style="color: #5F6672;font-style: italic;">//将发现m内为6</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>如果多个线程都要使用一个 <code>Mutex</code> ，那就不好搞啦，因为 <code>spawn</code> 创建的子线程如若要调用 <code>Mutex</code> ，则 <code>Mutex</code> 所有权进入子线程，后面创建的子线程就不能用了，如下：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">sync</span><span style="color: #E06C75;">::</span><span style="color: #E5C07B;">Mutex</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span>thread;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> counter</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Mutex</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #56B6C2;">0</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let mut</span><span style="color: #C6CCD7;"> handles</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> vec!</span><span>[];</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span style="color: #C6CCD7;"> _</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..</span><span style="color: #56B6C2;">10</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> handle</span><span style="color: #E06C75;"> =</span><span style="color: #61AFEF;"> thread</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">spawn</span><span>(</span><span style="color: #E06C75;">move ||</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let mut</span><span style="color: #C6CCD7;"> num</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> counter</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">lock</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            *</span><span style="color: #C6CCD7;">num</span><span style="color: #E06C75;"> +=</span><span style="color: #56B6C2;"> 1</span><span>;</span></span>
+<span class="giallo-l"><span>        });</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        handles</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">push</span><span>(</span><span style="color: #C6CCD7;">handle</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span style="color: #C6CCD7;"> handle</span><span style="color: #E06C75;"> in</span><span style="color: #C6CCD7;"> handles</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        handle</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">join</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Result: </span><span>{}&quot;,</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;">counter</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">lock</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>());</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span style="color: #5F6672;font-style: italic;">// 这段代码无法编译通过</span></span></code></pre>
+<p>但是我们也不能用之前提到过的智能指针 <code>Rc&lt;T&gt;</code> 实现多引用，我们需要一个和它类似的类型。</p>
+<p>从例子也可以看出， <code>Mutex</code> 也是具有内部可变性的。</p>
+<h4 id="arc-t-yuan-zi-yin-yong-ji-shu"><code>Arc&lt;T&gt;</code> 原子引用计数</h4>
+<p>使用例：</p>
+<pre class="giallo" style="color: #A9B2C3; background-color: #21252B;"><code data-lang="rust"><span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span style="color: #61AFEF;">sync</span><span style="color: #E06C75;">::</span><span>{</span><span style="color: #E5C07B;">Mutex</span><span>,</span><span style="color: #E5C07B;"> Arc</span><span>};</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">use</span><span style="color: #61AFEF;"> std</span><span style="color: #E06C75;">::</span><span>thread;</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">fn</span><span style="color: #B57EDC;"> main</span><span>() {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let</span><span style="color: #C6CCD7;"> counter</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Arc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #61AFEF;">Mutex</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">new</span><span>(</span><span style="color: #56B6C2;">0</span><span>));</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">    let mut</span><span style="color: #C6CCD7;"> handles</span><span style="color: #E06C75;"> =</span><span style="color: #B57EDC;"> vec!</span><span>[];</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span style="color: #C6CCD7;"> _</span><span style="color: #E06C75;"> in</span><span style="color: #56B6C2;"> 0</span><span style="color: #E06C75;">..</span><span style="color: #56B6C2;">10</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> counter</span><span style="color: #E06C75;"> =</span><span style="color: #E5C07B;"> Arc</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">clone</span><span>(</span><span style="color: #E06C75;">&amp;</span><span style="color: #C6CCD7;">counter</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">        let</span><span style="color: #C6CCD7;"> handle</span><span style="color: #E06C75;"> =</span><span style="color: #61AFEF;"> thread</span><span style="color: #E06C75;">::</span><span style="color: #B57EDC;">spawn</span><span>(</span><span style="color: #E06C75;">move ||</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #61AFEF;">            let mut</span><span style="color: #C6CCD7;"> num</span><span style="color: #E06C75;"> =</span><span style="color: #C6CCD7;"> counter</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">lock</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">            *</span><span style="color: #C6CCD7;">num</span><span style="color: #E06C75;"> +=</span><span style="color: #56B6C2;"> 1</span><span>;</span></span>
+<span class="giallo-l"><span>        });</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        handles</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">push</span><span>(</span><span style="color: #C6CCD7;">handle</span><span>);</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #E06C75;">    for</span><span style="color: #C6CCD7;"> handle</span><span style="color: #E06C75;"> in</span><span style="color: #C6CCD7;"> handles</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #C6CCD7;">        handle</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">join</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>();</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #B57EDC;">    println!</span><span>(&quot;</span><span style="color: #98C379;">Result: </span><span>{}&quot;,</span><span style="color: #E06C75;"> *</span><span style="color: #C6CCD7;">counter</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">lock</span><span>()</span><span style="color: #E06C75;">.</span><span style="color: #B57EDC;">unwrap</span><span>());</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+                </section>
+            </article>
+        </main>
+    </div>
+
+
+
+            
+                
+            
+
+            
+        </div>
+
+        <div class="right-content">
+            
+    
+    
+        <div class="toc">
+    <div class="heading">
+        Table of Contents
+    </div>
+    <ul class="toc-list">
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#ke-bian-he-bu-ke-bian-bian-liang">可变和不可变变量</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#shu-ju-lei-xing">数据类型</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#scalar">Scalar</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#compound">Compound</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#han-shu">函数</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#zhu-shi">注释</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#kong-zhi-liu">控制流</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#suo-you-quan">所有权</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#jie-gou">结构</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#mei-ju">枚举</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#packages-crates-and-modules">Packages, Crates and Modules</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#chang-yong-de-collections">常用的Collections</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#vectors">vectors</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#string-and-utf-8">String and UTF-8</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#hashmap">HashMap</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#error-handling">Error Handling</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#tong-cheng">统称</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#te-dian">特点</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#te-dian-de-sheng-ming">特点的声明：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#shi-yong-guan-jian-ci-forfu-yu-jie-gou-te-dian-li-zi-gei-liang-ge-bu-tong-de-jie-gou-ti-fu-yu-summaryde-te-dian">使用关键词for赋予结构特点，例子给两个不同的结构体赋予Summary的特点：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#diao-yong-fang-shi-lei-si-han-shu">调用方式，类似函数：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#ke-yi-she-zhi-mo-ren-de-te-dian">可以设置默认的特点：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#ba-te-dian-zuo-wei-han-shu-can-shu">把特点作为函数参数：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#tong-shi-man-zu-duo-ge-te-dian">同时满足多个特点：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#geng-duo-li-zi">更多例子：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#yao-qiu-fan-hui-zhi-shi-xian-te-dian">要求返回值实现特点：</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#shi-xian-bao-han-fan-xing-de-jie-gou-fang-fa-shi-qu-bie-dui-dai">实现包含泛型的结构方法时，区别对待：</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#lifetime">Lifetime</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#borrow-checker">Borrow Checker</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#can-shu-wei-yin-yong-bian-yi-qi-wu-fa-pan-duan-sheng-ming-zhou-qi-shi">参数为引用编译器无法判断生命周期时</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#jie-gou-ti-nei-de-bian-liang-ye-ke-yi-shi-yin-yong-dan-shi-bi-xu-zhi-ming-sheng-ming-zhou-qi">结构体内的变量也可以是引用，但是必须指明生命周期</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#wu-xu-sheng-ming-sheng-ming-zhou-qi-de-qing-kuang-lifetime-elision-rules">无需声明生命周期的情况(lifetime elision rules)</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#fan-xing-te-dian-sheng-ming-zhou-qi-da-za-hui">泛型、特点、生命周期大杂烩</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#ce-shi">测试</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#san-ge-ce-shi-han-shu">三个测试函数</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#partialeq-debug-te-dian">PartialEq Debug 特点</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#zi-ding-yi-shi-bai-xin-xi">自定义失败信息</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#should-panic">should_panic</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#result-t-e">Result&lt;T, E&gt;</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#kong-zhi-ce-shi-fang-shi">控制测试方式</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#dan-yuan-ce-shi-he-ji-cheng-ce-shi">单元测试和集成测试</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#bi-bao">闭包</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#die-dai-qi">迭代器</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#iterator-next">Iterator &amp; next</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#xiao-fei-die-dai-qi-de-fang-fa">消费迭代器的方法</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#jian-dan-bian-xie-zi-ding-yi-next">简单编写自定义next</a>
+                            </li>
+
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#xun-huan-vsdie-dai-qi">循环VS迭代器</a>
+
+                
+            </li>
+        
+            <li class="parent">
+                
+                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#zhi-neng-zhi-zhen">智能指针</a>
+
+                
+                    <ul>
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#box-t">Box&lt;T&gt;</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#di-gui-mei-ju">递归枚举</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#zi-ding-yi-yi-ge-zhi-neng-zhi-zhen">自定义一个智能指针</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#shi-xian-deref-trait">实现Deref trait</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#jie-zhu-deref-traitshi-xian-yin-shi-jie-yin-yong-qiang-zhi-zhuan-huan">借助Deref trait实现隐式解引用强制转换</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#drop-trait">Drop Trait</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#rc-t-yin-yong-ji-shu-zhi-neng-zhi-zhen">Rc&lt;T&gt; 引用计数智能指针</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#refcell-t-he-nei-bu-ke-bian-xing-mo-shi">RefCell&lt;T&gt; 和内部可变性模式</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#yuan-li">原理</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#rc-t-he-refcell-t-da-pei-shi-yong">Rc&lt;T&gt; 和 RefCell&lt;T&gt;搭配使用</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#li-yong-thread-spawn-shi-xian-duo-xian-cheng">利用 thread::spawn 实现多线程</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#li-yong-mpsc-channel-chuang-jian-tong-dao-yong-yu-jin-cheng-jian-tong-xun">利用 mpsc::channel 创建通道用于进程间通讯</a>
+                            </li>
+
+                            
+                        
+                            
+                            <li>
+                                <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#mutex-t-hu-chi-qi">Mutex&lt;T&gt; 互斥器</a>
+                            </li>
+
+                            
+                                <ul>
+                                    
+                                        <li>
+                                            <a href="https://kaifengzheng.github.io/posts/notes-of-rust/#arc-t-yuan-zi-yin-yong-ji-shu">Arc&lt;T&gt; 原子引用计数</a>
+                                        </li>
+                                    
+                                </ul>
+                            
+                        
+                    </ul>
+                
+            </li>
+        
+    </ul>
+</div>
+
+    
+
+        </div>
+        
+    </body>
+
+</html>
