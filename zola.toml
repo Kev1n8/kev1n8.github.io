@@ -1,0 +1,48 @@
+# The URL the site will be built for
+base_url = "https://kev1n8.github.io"
+
+# Site metadata
+title = "Kaifeng Zheng"
+description = "Some notes on Rust, distributed systems, databases, and more."
+
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to build a search index
+build_search_index = false
+
+# Taxonomies
+taxonomies = [{ name = "tags" }]
+
+# Theme
+theme = "apollo"
+
+# Generate feeds
+generate_feeds = true
+
+[markdown]
+
+[markdown.highlighting]
+theme = "plastic"
+
+[extra]
+toc = true
+use_cdn = false
+favicon = "/icon/favicon.png"
+theme = "toggle-auto"         # light, dark, auto, toggle, toggle-auto
+fancy_code = true
+
+# Menu bar
+menu = [
+    { name = "/posts", url = "/posts", weight = 1 },
+    { name = "/about", url = "/about", weight = 2 },
+    { name = "/tags", url = "/tags", weight = 3 },
+]
+
+socials = [
+    { name = "github", url = "https://github.com/Kev1n8", icon = "github" },
+]
+
+[extra.taxonomies]
+sort_by = "page_count"
+reverse = true
